@@ -1,3 +1,8 @@
+from .issue import Issue
+from .project import Project
+from .github_client import GraphQLClient
+
+
 def extract_issues_information(github_issues):
     issues = {}
     for edge in github_issues['edges']:

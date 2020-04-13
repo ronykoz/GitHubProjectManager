@@ -49,7 +49,7 @@ class Issue(object):
                 return PullRequest(timeline_node)
 
     def __gt__(self, other):
-        if self.priority > other.priority:  # todo: Update the priority to be a dynamin enum
+        if self.priority > other.priority:  # todo: Update the priority to be a dynamic enum
             return True
 
         elif self.priority == other.priority:
