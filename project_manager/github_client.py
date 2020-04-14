@@ -78,92 +78,92 @@ class GraphQLClient(object):
           }
         }''', {"owner": owner, "name": name, "number": number})
 
-    def get_github_issues_with_after(self, owner, name, after='',):
-        return self.execute_query('''
-            query ($after: String!, $owner: String!, $name: String!){
-              repository(owner: $owner, name: $name) {
-                issues(first: 100, after:$after, states: OPEN, labels:"bug") {
-                  edges {
-                    cursor
-                    node {
-                      timelineItems(first:30, itemTypes:[LABELED_EVENT, CROSS_REFERENCED_EVENT]){
-                        __typename
-                        ... on IssueTimelineItemsConnection{
-                          nodes {
-                            ... on CrossReferencedEvent {
-                              willCloseTarget
-                              source {
-                                __typename 
-                                ... on PullRequest {
-                                  state
-                                  assignees(first:10){
-                                    nodes{
-                                      login
+    def get_github_issues_with_after(self, owner, name, after, labels):
+        if not labels:
+            return self.execute_query('''
+                query ($after: String!, $owner: String!, $name: String!){
+                  repository(owner: $owner, name: $name) {
+                    issues(first: 100, after:$after, states: OPEN}) {
+                      edges {
+                        cursor
+                        node {
+                          timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                            __typename
+                            ... on IssueTimelineItemsConnection{
+                              nodes {
+                                ... on CrossReferencedEvent {
+                                  willCloseTarget
+                                  source {
+                                    __typename 
+                                    ... on PullRequest {
+                                      state
+                                      assignees(first:10){
+                                        nodes{
+                                          login
+                                        }
+                                      }
+                                      reviewRequests(first:1){
+                                        totalCount
+                                      }
+                                      reviews(first:1){
+                                        totalCount
+                                      }
+                                      number
+                                      reviewDecision
                                     }
                                   }
-                                  reviewRequests(first:1){
-                                    totalCount
+                                }
+                                __typename 
+                                ... on LabeledEvent {
+                                  label{
+                                    name
                                   }
-                                  reviews(first:1){
-                                    totalCount
+                                  createdAt
+                                }
+                                ... on UnlabeledEvent {
+                                  label{
+                                    name
                                   }
-                                  number
-                                  reviewDecision
+                                  createdAt
                                 }
                               }
                             }
-                            __typename 
-                            ... on LabeledEvent {
-                              label{
+                          }
+                          title
+                          id
+                          number
+                          milestone {
+                            title
+                          }
+                          labels(first: 10) {
+                            edges {
+                              node {
                                 name
                               }
-                              createdAt
                             }
-                            ... on UnlabeledEvent {
-                              label{
-                                name
+                          }
+                          assignees(last: 10) {
+                            edges {
+                              node {
+                                id
+                                login
                               }
-                              createdAt
                             }
-                          }
-                        }
-                      }
-                      title
-                      id
-                      number
-                      milestone {
-                        title
-                      }
-                      labels(first: 10) {
-                        edges {
-                          node {
-                            name
-                          }
-                        }
-                      }
-                      assignees(last: 10) {
-                        edges {
-                          node {
-                            id
-                            login
                           }
                         }
                       }
                     }
                   }
-                }
-              }
-            }''', {"after": after, "owner": owner, "name": name})
+                }''', {"after": after, "owner": owner, "name": name})
 
-    def get_github_issues(self, owner, name):
         return self.execute_query('''
-            query ($owner: String!, $name: String!){
+            query ($after: String!, $owner: String!, $name: String!, $labels: [String!]){
               repository(owner: $owner, name: $name) {
-                issues(first: 100, states: OPEN, labels:"bug") {
+                issues(first: 100, after:$after, states: OPEN, filterBy:{labels: $labels}) {
                   edges {
                     cursor
                     node {
-                      timelineItems(first:30, itemTypes:[LABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                      timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
                         __typename
                         ... on IssueTimelineItemsConnection{
                           nodes {
@@ -230,7 +230,161 @@ class GraphQLClient(object):
                   }
                 }
               }
-            }''', {"owner": owner, "name": name})
+            }''', {"after": after, "owner": owner, "name": name, "labels": labels})
+
+    def get_github_issues(self, owner, name, labels):
+        if not labels:
+            self.execute_query('''
+                query ($owner: String!, $name: String!){
+                  repository(owner: $owner, name: $name) {
+                    issues(first: 100, states: OPEN) {
+                      edges {
+                        cursor
+                        node {
+                          timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                            __typename
+                            ... on IssueTimelineItemsConnection{
+                              nodes {
+                                ... on CrossReferencedEvent {
+                                  willCloseTarget
+                                  source {
+                                    __typename 
+                                    ... on PullRequest {
+                                      state
+                                      assignees(first:10){
+                                        nodes{
+                                          login
+                                        }
+                                      }
+                                      reviewRequests(first:1){
+                                        totalCount
+                                      }
+                                      reviews(first:1){
+                                        totalCount
+                                      }
+                                      number
+                                      reviewDecision
+                                    }
+                                  }
+                                }
+                                __typename 
+                                ... on LabeledEvent {
+                                  label{
+                                    name
+                                  }
+                                  createdAt
+                                }
+                                ... on UnlabeledEvent {
+                                  label{
+                                    name
+                                  }
+                                  createdAt
+                                }
+                              }
+                            }
+                          }
+                          title
+                          id
+                          number
+                          milestone {
+                            title
+                          }
+                          labels(first: 10) {
+                            edges {
+                              node {
+                                name
+                              }
+                            }
+                          }
+                          assignees(last: 10) {
+                            edges {
+                              node {
+                                id
+                                login
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }''', {"owner": owner, "name": name})
+
+        return self.execute_query('''
+            query ($owner: String!, $name: String!, $labels: [String!]){
+              repository(owner: $owner, name: $name) {
+                issues(first: 100, states: OPEN, filterBy:{labels: $labels}) {
+                  edges {
+                    cursor
+                    node {
+                      timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                        __typename
+                        ... on IssueTimelineItemsConnection{
+                          nodes {
+                            ... on CrossReferencedEvent {
+                              willCloseTarget
+                              source {
+                                __typename 
+                                ... on PullRequest {
+                                  state
+                                  assignees(first:10){
+                                    nodes{
+                                      login
+                                    }
+                                  }
+                                  reviewRequests(first:1){
+                                    totalCount
+                                  }
+                                  reviews(first:1){
+                                    totalCount
+                                  }
+                                  number
+                                  reviewDecision
+                                }
+                              }
+                            }
+                            __typename 
+                            ... on LabeledEvent {
+                              label{
+                                name
+                              }
+                              createdAt
+                            }
+                            ... on UnlabeledEvent {
+                              label{
+                                name
+                              }
+                              createdAt
+                            }
+                          }
+                        }
+                      }
+                      title
+                      id
+                      number
+                      milestone {
+                        title
+                      }
+                      labels(first: 10) {
+                        edges {
+                          node {
+                            name
+                          }
+                        }
+                      }
+                      assignees(last: 10) {
+                        edges {
+                          node {
+                            id
+                            login
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }''', {"owner": owner, "name": name, "labels": labels})
 
     def add_issues_to_project(self, issue_id, column_id):
         return self.execute_query('''

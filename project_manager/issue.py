@@ -4,6 +4,7 @@ from typing import List, Dict
 from project_manager.pull_request import PullRequest
 from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 
+
 class Issue(object):
     def __init__(self, github_issue: Dict, priority_list: List):
         self.id = github_issue['id']
@@ -23,7 +24,7 @@ class Issue(object):
 
     def set_priority(self, priority_list: List):
         for index, priority_level in enumerate(priority_list):
-            for priority_name in priority_level.split(SAME_LEVEL_PRIORITY_IDENTIFIER)
+            for priority_name in priority_level.split(SAME_LEVEL_PRIORITY_IDENTIFIER):
                 if priority_name in self.labels:
                     self.priority_rank = len(priority_list) - index
                     break

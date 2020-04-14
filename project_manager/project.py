@@ -138,6 +138,7 @@ class Project(object):
             if not column_id:
                 continue
 
+            # todo: pass the card object, and delete from the current column
             card_id = self.get_card_id(issue.id)
             print(f"Moving card {issue.title} to '{column_name}'")
             self.columns[column_name].add_card(card_id=card_id,
@@ -152,5 +153,6 @@ class Project(object):
 
             for card in column.cards:
                 if card.issue_id not in issues:
+                    #todo: add title
                     print(f'Removing issue {card.issue_id} from project')
                     client.delete_project_card(card.id)

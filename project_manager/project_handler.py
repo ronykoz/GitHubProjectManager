@@ -7,13 +7,17 @@ from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 class ProjectManager(object):
     DEFAULT_PRIORITY_LIST = ['Critical', 'High', 'Medium', 'Low']
 
-    def __init__(self, project_owner, repository_name, project_number, priority_list=None, client=None):
+    def __init__(self, project_owner, repository_name, project_number, priority_list=None,
+                 client=None, filter_labels=None, filter_milestone=None):
         self.project_owner = project_owner
         self.repository_name = repository_name
         self.project_number = project_number
 
         self.priority_list = priority_list if priority_list else self.DEFAULT_PRIORITY_LIST
         self.client = client if client else GraphQLClient()
+
+        self.filter_labels = filter_labels if filter_labels else []
+        self.filter_milestone = filter_milestone  #todo: deal with milestone
 
         self.project = self.get_github_project()
         self.matching_issues = self.get_github_issues()  # todo: add the option to add more filters
@@ -41,19 +45,25 @@ class ProjectManager(object):
 
     def get_github_issues(self):
         response = self.client.get_github_issues(owner=self.project_owner,
-                                                 name=self.repository_name)
+                                                 name=self.repository_name,
+                                                 labels=self.filter_labels)
         issues = response.get('repository', {}).get('issues', {})
 
-        while len(response.get('repository', {}).get('issues', {}).get('edges')) > 0:
+        while len(response.get('repository', {}).get('issues', {}).get('edges')) >= 100:
             after = response.get('repository', {}).get('issues', {}).get('edges')[-1].get('cursor')
-            issues.get('edges').extend(response.get('repository', {}).get('issues', {}).get('edges'))
             response = self.client.get_github_issues_with_after(owner=self.project_owner,
                                                                 name=self.repository_name,
-                                                                after=after)
+                                                                after=after,
+                                                                labels=self.filter_labels)
+            issues.get('edges').extend(response.get('repository', {}).get('issues', {}).get('edges'))
 
+        import ipdb
+        ipdb.set_trace()
         return self.construct_issue_object(issues)
 
     def add_issues_to_project(self):
+        import ipdb
+        ipdb.set_trace()
         issues_to_add = self.project.find_missing_issue_ids(self.matching_issues)
         self.project.add_issues(self.client, self.matching_issues, issues_to_add)
 
@@ -74,7 +84,8 @@ def bug_manger():
     manager = ProjectManager(project_owner='demisto',
                              repository_name='etc',
                              project_number=31,
-                             priority_list=priority_list)
+                             priority_list=priority_list,
+                             filter_labels=["bug"])
     manager.manage()
 
 
