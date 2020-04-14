@@ -1,6 +1,7 @@
 from project_manager.issue import Issue
 from project_manager.project import Project
 from project_manager.github_client import GraphQLClient
+from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 
 
 class ProjectManager(object):
@@ -68,7 +69,8 @@ class ProjectManager(object):
 
 
 def bug_manger():
-    priority_list = ['PoC Blocker', 'Critical', 'High', 'Medium', 'Low', 'Customer']
+    priority_list = ['PoC Blocker', 'Critical', 'High', 'Medium', 'Low',
+                     f'Customer{SAME_LEVEL_PRIORITY_IDENTIFIER}zendesk']
     manager = ProjectManager(project_owner='demisto',
                              repository_name='etc',
                              project_number=31,

@@ -2,7 +2,7 @@ from dateutil.parser import parse
 from typing import List, Dict
 
 from project_manager.pull_request import PullRequest
-
+from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 
 class Issue(object):
     def __init__(self, github_issue: Dict, priority_list: List):
@@ -22,10 +22,11 @@ class Issue(object):
         self.milestone = github_issue['milestone']['title'] if github_issue['milestone'] else github_issue['milestone']
 
     def set_priority(self, priority_list: List):
-        for index, priority in enumerate(priority_list):
-            if priority in self.labels:
-                self.priority_rank = len(priority) - index
-                break
+        for index, priority_level in enumerate(priority_list):
+            for priority_name in priority_level.split(SAME_LEVEL_PRIORITY_IDENTIFIER)
+                if priority_name in self.labels:
+                    self.priority_rank = len(priority_list) - index
+                    break
 
         else:
             self.priority_rank = 0

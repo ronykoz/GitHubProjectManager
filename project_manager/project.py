@@ -44,7 +44,7 @@ class ProjectColumn(object):
             return
 
         for i in range(len(self.cards) - 1):
-            if issues[self.cards[i].issue_id] > new_issue > issues[self.cards[i + 1].issue_id]:
+            if issues[self.cards[i].issue_id] > new_issue and new_issue > issues[self.cards[i + 1].issue_id]:
                 insert_after_position = i
                 break
 
