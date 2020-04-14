@@ -1,7 +1,7 @@
 from dateutil.parser import parse
 from typing import List, Dict
 
-from src.pull_request import PullRequest
+from project_manager.pull_request import PullRequest
 
 
 class Issue(object):

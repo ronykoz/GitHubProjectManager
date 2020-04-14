@@ -1,6 +1,6 @@
-from src.issue import Issue
-from src.project import Project
-from src.github_client import GraphQLClient
+from project_manager.issue import Issue
+from project_manager.project import Project
+from project_manager.github_client import GraphQLClient
 
 
 def extract_issues_information(github_issues):
