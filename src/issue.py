@@ -9,6 +9,7 @@ class Issue(object):
         self.id = github_issue['id']
         self.title = github_issue['title']
         self.number = github_issue['number']
+        self.milestone = github_issue.get('milestone', {}).get('title')
         self.assignees = self.get_assignees(github_issue['assignees']['edges'])
         self.pull_request = self.get_pull_request(github_issue)
 

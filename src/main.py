@@ -608,10 +608,6 @@ def process_issue_moves():
     project.re_order_issues(client, issues)
 
 
-# todo: deal with milestone
-# todo update the labels handling
-# todo add gt function
-# todo separate to classes
 # todo add ut
 
 if __name__ == "__main__":

@@ -37,12 +37,17 @@ def get_github_information(client):
     return project, issues
 
 
+def add_issues_to_project(client, project, issues):
+    issues_to_add = project.find_missing_issue_ids(issues)
+    project.add_issues(client, issues, issues_to_add)
+
+
 def process_issue_moves():
     client = GraphQLClient()
     project, issues = get_github_information(client)
 
     project.add_issues(client, issues)
-    # project.remove_issues(client, issues)
+    project.remove_issues(client, issues)
     project.re_order_issues(client, issues)
 
 
