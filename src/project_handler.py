@@ -7,7 +7,7 @@ def extract_issues_information(github_issues):
     issues = {}
     for edge in github_issues['edges']:
         node_data = edge['node']
-        labels = Issue.get_labels(node_data['labels']['edges'])
+        labels = Issue.get_current_labels(node_data['labels']['edges'])
         if 'content' not in labels or 'Playbooks' in labels:
             continue  # In this case we don't need the issue
 
@@ -17,7 +17,7 @@ def extract_issues_information(github_issues):
     return issues
 
 
-PRIORITY_LIST = ['Critical', 'High', 'Medium', 'Low', 'Customer', None]
+PRIORITY_LIST = ['PoC Blocker', 'Critical', 'High', 'Medium', 'Low', 'Customer', None]
 
 
 def get_github_information(client):
@@ -42,7 +42,7 @@ def process_issue_moves():
     project, issues = get_github_information(client)
 
     project.add_issues(client, issues)
-    project.remove_issues(client, issues)
+    # project.remove_issues(client, issues)
     project.re_order_issues(client, issues)
 
 

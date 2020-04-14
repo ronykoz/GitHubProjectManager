@@ -1,4 +1,6 @@
+import os
 import requests
+
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -10,11 +12,12 @@ class GraphQLClient(object):
     BASE_URL = 'https://api.github.com'
 
     def __init__(self):
+        api_key = os.getenv("GITHUB_TOKEN")  # TODO: add explanation
         sample_transport = RequestsHTTPTransport(
             url=self.BASE_URL + '/graphql',
             use_json=True,
             headers={
-                'Authorization': "Bearer "
+                'Authorization': f"Bearer {api_key}"
             },
             verify=False
         )
@@ -109,7 +112,14 @@ class GraphQLClient(object):
                                 }
                               }
                             }
+                            __typename 
                             ... on LabeledEvent {
+                              label{
+                                name
+                              }
+                              createdAt
+                            }
+                            ... on UnlabeledEvent {
                               label{
                                 name
                               }
@@ -179,7 +189,14 @@ class GraphQLClient(object):
                                 }
                               }
                             }
+                            __typename 
                             ... on LabeledEvent {
+                              label{
+                                name
+                              }
+                              createdAt
+                            }
+                            ... on UnlabeledEvent {
                               label{
                                 name
                               }
@@ -227,7 +244,23 @@ class GraphQLClient(object):
           }
         }''', {'contentID': issue_id, 'columnId': column_id})
 
-    def move_issue_in_project(self, card_id, column_id, after_card_id=''):
+    def add_to_column(self, card_id, column_id):
+        variable_dict = {'cardId': card_id, 'columnId': column_id}
+
+        self.execute_query('''
+        mutation moveProjectCardAction($cardId: ID!, $columnId: ID!){
+          moveProjectCard(input: {cardId: $cardId, columnId: $columnId}) {
+            cardEdge{
+              node{
+                id
+              }
+            }
+          }
+        }''', variable_dict)
+
+    def move_to_specific_place_in_column(self, card_id, column_id, after_card_id):
+        variable_dict = {'cardId': card_id, 'columnId': column_id, 'afterCardId': after_card_id}
+
         self.execute_query('''
         mutation moveProjectCardAction($cardId: ID!, $columnId: ID!, $afterCardId: ID!){
           moveProjectCard(input: {cardId: $cardId, columnId: $columnId, afterCardId: $afterCardId}) {
@@ -237,7 +270,7 @@ class GraphQLClient(object):
               }
             }
           }
-        }''', {'cardId': card_id, 'columnId': column_id, 'afterCardId': after_card_id})
+        }''', variable_dict)
 
     def delete_project_card(self, card_id):
         return self.execute_query('''

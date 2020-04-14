@@ -39,8 +39,8 @@ class ProjectColumn(object):
         insert_after_position = len(self.cards) - 1  # In case it should be the lowest issue
         if new_issue > issues[self.cards[0].issue_id]:
             self.cards.insert(0, IssueCard(id=card_id, issue_id=issue_id))
-            client.move_issue_in_project(card_id=card_id,
-                                         column_id=self.id)
+            client.add_to_column(card_id=card_id,
+                                 column_id=self.id)
             return
 
         for i in range(len(self.cards) - 1):
@@ -50,9 +50,9 @@ class ProjectColumn(object):
 
         self.cards.insert(insert_after_position + 1,
                           IssueCard(id=card_id, issue_id=issue_id))
-        client.move_issue_in_project(card_id=card_id,
-                                     column_id=self.id,
-                                     after_card_id=self.cards[insert_after_position].id)
+        client.move_to_specific_place_in_column(card_id=card_id,
+                                                column_id=self.id,
+                                                after_card_id=self.cards[insert_after_position].id)
 
     def get_card_id(self, issue_id):
         for card in self.cards:
@@ -98,7 +98,7 @@ class Project(object):
 
     def get_matching_column(self, issue):
         column_name = ''
-        if 'PendingSupport' in issue.get_labels() or 'PendingVerification' in issue.get_labels():
+        if 'PendingSupport' in issue.labels or 'PendingVerification' in issue.labels:
             if not self.is_in_column('Pending Support', issue.id):
                 column_name = 'Pending Support'
 

@@ -9,28 +9,26 @@ class Issue(object):
         self.id = github_issue['id']
         self.title = github_issue['title']
         self.number = github_issue['number']
-        self.assignees = Issue.get_assignees(github_issue['assignees']['edges'])
+        self.assignees = self.get_assignees(github_issue['assignees']['edges'])
         self.pull_request = self.get_pull_request(github_issue)
 
-        self.labels_to_date = self.extract_labels(github_issue)
+        self.labels = self.get_current_labels(github_issue['labels']['edges'])
+        self.labels_information = self.extract_labels_information(github_issue)
 
-        self.priority_power = None  # Todo: add this here
+        self.priority_rank = None  # Todo: add this here
         self.set_priority(priority_list)
-
-    def get_labels(self):
-        return self.labels_to_date.keys()
 
     def set_priority(self, priority_list: List):
         for index, priority in enumerate(priority_list):
             if priority in self.labels:
-                self.priority_power = len(priority) - index
+                self.priority_rank = len(priority) - index
                 break
 
         else:
-            self.priority_power = 0
+            self.priority_rank = 0
 
     @staticmethod
-    def get_labels(label_edges):
+    def get_current_labels(label_edges):
         label_names = []
         for edge in label_edges:
             node_data = edge.get('node')
@@ -62,17 +60,17 @@ class Issue(object):
                 return PullRequest(timeline_node)
 
     def __gt__(self, other):
-        if self.priority > other.priority:  # todo: Update the priority to be a dynamic enum
+        if self.priority_rank > other.priority_rank:  # todo: Update the priority to be a dynamic enum
             return True
 
-        elif self.priority == other.priority:
+        elif self.priority_rank == other.priority_rank:
             if self.number < other.number:  # lower issue number means older issue - hence more prioritized
                 return True
 
         return False
 
     @staticmethod
-    def extract_labels(issue_node):
+    def extract_labels_information(issue_node):
         labels = {}
         timeline_nodes = issue_node['timelineItems']['nodes']
         for timeline_node in timeline_nodes:
@@ -81,6 +79,12 @@ class Issue(object):
 
             label = timeline_node['label']['name']
             created_at = parse(timeline_node['createdAt'])
+
+            # Checking if the label was removed
+            if 'UnlabeledEvent' in timeline_node and label in labels and labels[label] < created_at:
+                del labels[label]
+                continue
+
             if label not in labels or labels[label] < created_at:
                 labels[label] = created_at
 
