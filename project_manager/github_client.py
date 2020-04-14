@@ -32,11 +32,11 @@ class GraphQLClient(object):
         response = self.client.execute(gql_query, variable_values=variable_values)
         return response
 
-    def get_github_project(self):
+    def get_github_project(self, owner, name, number):
         return self.execute_query('''
-        {
-          repository(owner: "demisto", name: "etc") {
-            project(number: 31) {
+        query ($owner: String!, $name: String!, $number: Int!){
+          repository(owner: $owner, name: $name) {
+            project(number: $number) {
               name
               id
               columns(first: 30) {
@@ -76,12 +76,12 @@ class GraphQLClient(object):
               }
             }
           }
-        }''')
+        }''', {"owner": owner, "name": name, "number": number})
 
-    def get_github_issues_with_after(self, after=''):
+    def get_github_issues_with_after(self, owner, name, after='',):
         return self.execute_query('''
-            query ($after: String!){
-              repository(owner: "demisto", name: "etc") {
+            query ($after: String!, $owner: String!, $name: String!){
+              repository(owner: $owner, name: $name) {
                 issues(first: 100, after:$after, states: OPEN, labels:"bug") {
                   edges {
                     cursor
@@ -153,12 +153,12 @@ class GraphQLClient(object):
                   }
                 }
               }
-            }''', {"after": after})
+            }''', {"after": after, "owner": owner, "name": name})
 
-    def get_github_issues(self):
+    def get_github_issues(self, owner, name):
         return self.execute_query('''
-            query {
-              repository(owner: "demisto", name: "etc") {
+            query ($owner: String!, $name: String!){
+              repository(owner: $owner, name: $name) {
                 issues(first: 100, states: OPEN, labels:"bug") {
                   edges {
                     cursor
@@ -230,7 +230,7 @@ class GraphQLClient(object):
                   }
                 }
               }
-            }''')
+            }''', {"owner": owner, "name": name})
 
     def add_issues_to_project(self, issue_id, column_id):
         return self.execute_query('''

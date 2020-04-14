@@ -95,7 +95,7 @@ class Project(object):
 
         return False
 
-    def get_matching_column(self, issue):
+    def get_matching_column(self, issue):  # todo have this configurable
         column_name = ''
         if 'PendingSupport' in issue.labels or 'PendingVerification' in issue.labels:
             if not self.is_in_column('Pending Support', issue.id):
