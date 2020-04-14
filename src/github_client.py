@@ -1,5 +1,9 @@
+import requests
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+
+# Disable insecure warnings
+requests.packages.urllib3.disable_warnings()
 
 
 class GraphQLClient(object):
@@ -224,7 +228,6 @@ class GraphQLClient(object):
         }''', {'contentID': issue_id, 'columnId': column_id})
 
     def move_issue_in_project(self, card_id, column_id, after_card_id=''):
-        #todo: afterCardId
         self.execute_query('''
         mutation moveProjectCardAction($cardId: ID!, $columnId: ID!, $afterCardId: ID!){
           moveProjectCard(input: {cardId: $cardId, columnId: $columnId, afterCardId: $afterCardId}) {

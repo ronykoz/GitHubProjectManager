@@ -1,6 +1,6 @@
-from .issue import Issue
-from .project import Project
-from .github_client import GraphQLClient
+from src.issue import Issue
+from src.project import Project
+from src.github_client import GraphQLClient
 
 
 def extract_issues_information(github_issues):
@@ -11,10 +11,13 @@ def extract_issues_information(github_issues):
         if 'content' not in labels or 'Playbooks' in labels:
             continue  # In this case we don't need the issue
 
-        issue = Issue(node_data)
+        issue = Issue(node_data, PRIORITY_LIST)
         issues[issue.id] = issue
 
     return issues
+
+
+PRIORITY_LIST = ['Critical', 'High', 'Medium', 'Low', 'Customer', None]
 
 
 def get_github_information(client):

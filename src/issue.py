@@ -1,20 +1,33 @@
 from dateutil.parser import parse
+from typing import List, Dict
 
-from .pull_request import PullRequest
+from src.pull_request import PullRequest
 
 
 class Issue(object):
-    def __init__(self, github_issue):
+    def __init__(self, github_issue: Dict, priority_list: List):
         self.id = github_issue['id']
         self.title = github_issue['title']
         self.number = github_issue['number']
-        self.labels = self.get_labels(github_issue['labels']['edges'])
         self.assignees = Issue.get_assignees(github_issue['assignees']['edges'])
         self.pull_request = self.get_pull_request(github_issue)
 
         self.labels_to_date = self.extract_labels(github_issue)
 
-        self.priority = None  # Todo: add this here
+        self.priority_power = None  # Todo: add this here
+        self.set_priority(priority_list)
+
+    def get_labels(self):
+        return self.labels_to_date.keys()
+
+    def set_priority(self, priority_list: List):
+        for index, priority in enumerate(priority_list):
+            if priority in self.labels:
+                self.priority_power = len(priority) - index
+                break
+
+        else:
+            self.priority_power = 0
 
     @staticmethod
     def get_labels(label_edges):

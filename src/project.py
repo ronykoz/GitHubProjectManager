@@ -6,11 +6,10 @@ class IssueCard(object):
 
 
 class ProjectColumn(object):
-    def __init__(self, column_node, priority_list):
+    def __init__(self, column_node):
         self.id = column_node['id']
         self.name = column_node['name']
         self.cards = []
-        self.priority_list = priority_list
 
         self.extract_card_node_data(column_node)  # todo: convert to list
 
@@ -35,67 +34,10 @@ class ProjectColumn(object):
     def get_all_issue_ids(self):
         return {card.issue_id for card in self.cards}
 
-    def get_issue_priority(self, issue):
-        for priority in self.priority_list:
-            if priority in issue.labels:
-                return priority
-
-        return
-
-    def is_right_card_location(self, new_issue, next_issue, prev_issue=None):
-        issue_priority = self.get_issue_priority(new_issue)
-        for priority in self.priority_list:
-            # First place handling
-            if priority and not prev_issue:
-                if priority in new_issue.labels and priority not in next_issue.labels:
-                    return True
-
-                if priority in new_issue.labels and priority in next_issue.labels and new_issue.number < \
-                        next_issue.numsber:
-                    return True
-
-                return False
-
-            #todo: handle bigger priority
-
-            # Priority handling for High(prev) - Not High(New) - High(Next)
-            if priority in prev_issue.labels and priority in next_issue.labels and priority not in new_issue.labels:
-                return False
-
-            # The same priority handling
-            if priority in prev_issue.labels and priority in new_issue.labels and priority in next_issue.labels:
-                if prev_issue.number < new_issue.number < next_issue.number:
-                    return True
-
-                return False
-
-            # Priority switch handling
-            if priority in prev_issue.labels and priority in new_issue.labels and priority not in next_issue.labels:
-                return True
-
-            if priority not in prev_issue.labels and priority in new_issue.labels and priority in next_issue.labels:
-                if new_issue.number < next_issue.number:
-                    return True
-
-                return False
-
-            # No special priority handling
-            if not priority and all([label not in self.priority_list for label in new_issue.labels]):
-                if prev_issue and prev_issue.number < new_issue.number < next_issue.number:
-                    return True
-
-                elif new_issue.number < next_issue.number:
-                    return True
-
-                return False
-
-        return False
-
     def add_card(self, card_id, issue_id, issues, client):
         new_issue = issues[issue_id]
         insert_after_position = len(self.cards) - 1  # In case it should be the lowest issue
         if new_issue > issues[self.cards[0].issue_id]:
-        # if self.is_right_card_location(new_issue, issues[self.cards[0].issue_id]):
             self.cards.insert(0, IssueCard(id=card_id, issue_id=issue_id))
             client.move_issue_in_project(card_id=card_id,
                                          column_id=self.id)
@@ -103,9 +45,6 @@ class ProjectColumn(object):
 
         for i in range(len(self.cards) - 1):
             if issues[self.cards[i].issue_id] > new_issue > issues[self.cards[i + 1].issue_id]:
-            # if self.is_right_card_location(new_issue,
-            #                                issues[self.cards[i + 1].issue_id],
-            #                                issues[self.cards[i].issue_id]):
                 insert_after_position = i
                 break
 
@@ -124,13 +63,11 @@ class ProjectColumn(object):
 
 
 class Project(object):
-    PRIORITY_LIST = ['Critical', 'High', 'Medium', 'Low', 'Customer', None]
-
     def __init__(self, git_hub_project):
         self.all_issues = set()
         self.columns = {}
         for column_node in git_hub_project['columns']['nodes']:
-            column = ProjectColumn(column_node, self.PRIORITY_LIST)
+            column = ProjectColumn(column_node)
 
             self.columns[column.name] = column
             self.all_issues = self.all_issues.union(column.get_all_issue_ids())
@@ -161,7 +98,7 @@ class Project(object):
 
     def get_matching_column(self, issue):
         column_name = ''
-        if 'PendingSupport' in issue.labels or 'PendingVerification' in issue.labels:
+        if 'PendingSupport' in issue.get_labels() or 'PendingVerification' in issue.get_labels():
             if not self.is_in_column('Pending Support', issue.id):
                 column_name = 'Pending Support'
 
@@ -211,7 +148,7 @@ class Project(object):
 
     def remove_issues(self, client, issues):
         for column in self.columns.values():
-            if column.name == 'Done':
+            if column.name == 'Done':  # Not going over closed issues, todo: add done column name config
                 continue
 
             for card in column.cards:
