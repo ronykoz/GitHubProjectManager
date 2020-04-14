@@ -46,7 +46,7 @@ def process_issue_moves():
     client = GraphQLClient()
     project, issues = get_github_information(client)
 
-    project.add_issues(client, issues)
+    add_issues_to_project(client, project, issues)
     project.remove_issues(client, issues)
     project.re_order_issues(client, issues)
 

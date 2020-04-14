@@ -9,7 +9,7 @@ class Issue(object):
         self.id = github_issue['id']
         self.title = github_issue['title']
         self.number = github_issue['number']
-        self.milestone = github_issue.get('milestone', {}).get('title')
+
         self.assignees = self.get_assignees(github_issue['assignees']['edges'])
         self.pull_request = self.get_pull_request(github_issue)
 
@@ -18,6 +18,8 @@ class Issue(object):
 
         self.priority_rank = None  # Todo: add this here
         self.set_priority(priority_list)
+
+        self.milestone = github_issue['milestone']['title'] if github_issue['milestone'] else github_issue['milestone']
 
     def set_priority(self, priority_list: List):
         for index, priority in enumerate(priority_list):
