@@ -30,7 +30,7 @@ class ProjectColumn(object):
 
             cards.append(IssueCard(id=card.get('node', {}).get('id'),
                                    issue_id=card_content['id'],
-                                   cursor=card['cursor'],\
+                                   cursor=card['cursor'],
                                    issue_title=card_content['title']))
 
         return cards
