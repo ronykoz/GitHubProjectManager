@@ -12,6 +12,11 @@ class Configuration(object):
         'cant_have_labels',
         'column_order'
     ]
+    CONDITIONAL_LIST_ATTRIBUTES = [
+        'issue.assignees',
+        'issue.labels',
+        'issue.pull_request.assignees'
+    ]
     PERMITTED_QUERIES = [
         'issue.assignees',
         'issue.pull_request',
@@ -19,7 +24,7 @@ class Configuration(object):
         'issue.labels',
         'issue.pull_request.review_completed',
         'issue.pull_request.assignees'
-    ]  # TODO: load this list dynamicaly from the project
+    ]  # TODO: load this list dynamically from the project
 
     SECTION_NAME_ERROR = 'You have either added a section which is not in the column_order key in the ' \
                          'General section, or miss-spelled. The section name is {}'
@@ -78,18 +83,21 @@ class Configuration(object):
                 if key not in self.PERMITTED_QUERIES:
                     raise ValueError(self.ILLEGAL_QUERY.format(key))
                 value = self.config[section][key]
-                if self.DELIMITER in value:
-                    value = [value]
 
-                if value in ['true', 'false']:
-                    value = bool(value)
+                if key in self.CONDITIONAL_LIST_ATTRIBUTES:
+                    value = value.split(self.DELIMITER)
+
+                if value in ['true', 'True']:
+                    value = True
+
+                if value in ['false', 'False']:
+                    value = False
 
                 self.column_to_rules[section][key] = value
 
     def load_properties(self):
         self.load_general_properties()
         self.load_column_rules()
-        print(self.column_to_rules)
 
 
 if __name__ == '__main__':

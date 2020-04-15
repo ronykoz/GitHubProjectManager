@@ -89,7 +89,9 @@ class Project(object):
 
         self.done_column_name = done_column_name
 
-    def temp_get_matching_column(self, config: Dict):
+    def temp_get_matching_column(self, issue, config: Dict):
+        import ipdb
+        ipdb.set_trace()
         column_name = ''
         for tested_column_name, conditions in config.items():
             is_true = True
@@ -106,6 +108,11 @@ class Project(object):
                         elif option not in condition_results:
                             is_true = False
                             break
+
+                elif isinstance(condition_value, bool):
+                    if (condition_value and not condition_results) or (not condition_value and condition_results):
+                        is_true = False
+                        break
 
                 elif condition_value != condition_results:
                     is_true = False

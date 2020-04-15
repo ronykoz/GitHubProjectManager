@@ -55,13 +55,13 @@ class Issue(object):
 
     @staticmethod
     def get_assignees(assignee_edges):
-        assignee_id_to_name = {}
+        assignees = []
         for edge in assignee_edges:
             node_data = edge.get('node')
             if node_data:
-                assignee_id_to_name[node_data['id']] = node_data['login']
+                assignees.append(node_data['login'])
 
-        return assignee_id_to_name
+        return assignees
 
     @staticmethod
     def get_pull_request(issue_node):
