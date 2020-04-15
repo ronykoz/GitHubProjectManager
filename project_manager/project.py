@@ -147,12 +147,12 @@ class Project(object):
         return None, None
 
     def re_order_issues(self, client, issues):
+        # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
             column_name, column_id = self.get_matching_column(issue)
             if not column_id:
                 continue
 
-            # todo: pass the card object instead of deleting it
             prev_column_name, card_id = self.get_current_location(issue.id)
             print(f"Moving card {issue.title} from {prev_column_name} to '{column_name}'")
             self.columns[column_name].add_card(card_id=card_id,
