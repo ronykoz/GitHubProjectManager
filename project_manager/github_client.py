@@ -11,8 +11,8 @@ requests.packages.urllib3.disable_warnings()
 class GraphQLClient(object):
     BASE_URL = 'https://api.github.com'
 
-    def __init__(self):
-        api_key = os.getenv("GITHUB_TOKEN")  # TODO: add explanation in readme
+    def __init__(self, api_key=None):
+        api_key = api_key if api_key else os.getenv("GITHUB_TOKEN")  # TODO: add explanation in readme
         sample_transport = RequestsHTTPTransport(
             url=self.BASE_URL + '/graphql',
             use_json=True,
@@ -78,12 +78,19 @@ class GraphQLClient(object):
           }
         }''', {"owner": owner, "name": name, "number": number})
 
-    def get_github_issues_with_after(self, owner, name, after, labels):
+    def get_github_issues(self, owner, name, after, labels, milestone):
+        vars = {"owner": owner, "name": name, "labels": labels, "milestone": milestone, "after": after}
+        if not milestone:
+            del vars['milestone']
+        if not after:
+            del vars['after']
+
         if not labels:
+            del vars['labels']
             return self.execute_query('''
-                query ($after: String!, $owner: String!, $name: String!){
+                query ($after: String!, $owner: String!, $name: String!, $milestone: String){
                   repository(owner: $owner, name: $name) {
-                    issues(first: 100, after:$after, states: OPEN}) {
+                    issues(first: 100, after:$after, states: OPEN, filterBy:{milestone: $milestone}) {
                       edges {
                         cursor
                         node {
@@ -154,12 +161,12 @@ class GraphQLClient(object):
                       }
                     }
                   }
-                }''', {"after": after, "owner": owner, "name": name})
+                }''', vars)
 
         return self.execute_query('''
-            query ($after: String!, $owner: String!, $name: String!, $labels: [String!]){
+            query ($after: String, $owner: String!, $name: String!, $labels: [String!], $milestone: String){
               repository(owner: $owner, name: $name) {
-                issues(first: 100, after:$after, states: OPEN, filterBy:{labels: $labels}) {
+                issues(first: 100, after:$after, states: OPEN, filterBy:{labels: $labels, milestone: $milestone}) {
                   edges {
                     cursor
                     node {
@@ -230,161 +237,7 @@ class GraphQLClient(object):
                   }
                 }
               }
-            }''', {"after": after, "owner": owner, "name": name, "labels": labels})
-
-    def get_github_issues(self, owner, name, labels):
-        if not labels:  #todo: check the optional args
-            self.execute_query('''
-                query ($owner: String!, $name: String!){
-                  repository(owner: $owner, name: $name) {
-                    issues(first: 100, states: OPEN) {
-                      edges {
-                        cursor
-                        node {
-                          timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
-                            __typename
-                            ... on IssueTimelineItemsConnection{
-                              nodes {
-                                ... on CrossReferencedEvent {
-                                  willCloseTarget
-                                  source {
-                                    __typename 
-                                    ... on PullRequest {
-                                      state
-                                      assignees(first:10){
-                                        nodes{
-                                          login
-                                        }
-                                      }
-                                      reviewRequests(first:1){
-                                        totalCount
-                                      }
-                                      reviews(first:1){
-                                        totalCount
-                                      }
-                                      number
-                                      reviewDecision
-                                    }
-                                  }
-                                }
-                                __typename 
-                                ... on LabeledEvent {
-                                  label{
-                                    name
-                                  }
-                                  createdAt
-                                }
-                                ... on UnlabeledEvent {
-                                  label{
-                                    name
-                                  }
-                                  createdAt
-                                }
-                              }
-                            }
-                          }
-                          title
-                          id
-                          number
-                          milestone {
-                            title
-                          }
-                          labels(first: 10) {
-                            edges {
-                              node {
-                                name
-                              }
-                            }
-                          }
-                          assignees(last: 10) {
-                            edges {
-                              node {
-                                id
-                                login
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }''', {"owner": owner, "name": name})
-
-        return self.execute_query('''
-            query ($owner: String!, $name: String!, $labels: [String!]){
-              repository(owner: $owner, name: $name) {
-                issues(first: 100, states: OPEN, filterBy:{labels: $labels}) {
-                  edges {
-                    cursor
-                    node {
-                      timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
-                        __typename
-                        ... on IssueTimelineItemsConnection{
-                          nodes {
-                            ... on CrossReferencedEvent {
-                              willCloseTarget
-                              source {
-                                __typename 
-                                ... on PullRequest {
-                                  state
-                                  assignees(first:10){
-                                    nodes{
-                                      login
-                                    }
-                                  }
-                                  reviewRequests(first:1){
-                                    totalCount
-                                  }
-                                  reviews(first:1){
-                                    totalCount
-                                  }
-                                  number
-                                  reviewDecision
-                                }
-                              }
-                            }
-                            __typename 
-                            ... on LabeledEvent {
-                              label{
-                                name
-                              }
-                              createdAt
-                            }
-                            ... on UnlabeledEvent {
-                              label{
-                                name
-                              }
-                              createdAt
-                            }
-                          }
-                        }
-                      }
-                      title
-                      id
-                      number
-                      milestone {
-                        title
-                      }
-                      labels(first: 10) {
-                        edges {
-                          node {
-                            name
-                          }
-                        }
-                      }
-                      assignees(last: 10) {
-                        edges {
-                          node {
-                            id
-                            login
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }''', {"owner": owner, "name": name, "labels": labels})
+            }''', vars)
 
     def add_issues_to_project(self, issue_id, column_id):
         return self.execute_query('''

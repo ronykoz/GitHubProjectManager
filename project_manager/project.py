@@ -63,9 +63,15 @@ class ProjectColumn(object):
 
         return
 
+    def remove_card(self, card_id):
+        for index, card in enumerate(self.cards):
+            if card_id == card.id:
+                del self.cards[index]
+                break
+
 
 class Project(object):
-    def __init__(self, git_hub_project):
+    def __init__(self, git_hub_project, done_column_name):
         self.all_issues = set()
         self.columns = {}
         for column_node in git_hub_project['columns']['nodes']:
@@ -73,6 +79,8 @@ class Project(object):
 
             self.columns[column.name] = column
             self.all_issues = self.all_issues.union(column.get_all_issue_ids())
+
+        self.done_column_name = done_column_name
 
     def find_missing_issue_ids(self, issues):
         issues_in_project_keys = set(self.all_issues)
@@ -97,7 +105,7 @@ class Project(object):
 
         return False
 
-    def get_matching_column(self, issue):  # todo have this configurable
+    def get_matching_column(self, issue):  # todo: have this configurable
         column_name = ''
         if 'PendingSupport' in issue.labels or 'PendingVerification' in issue.labels:
             if not self.is_in_column('Pending Support', issue.id):
@@ -128,29 +136,33 @@ class Project(object):
 
         return column_name, column_id
 
-    def get_card_id(self, issue_id):
-        for column in self.columns.values():
+    def get_current_location(self, issue_id):
+        for column_name, column in self.columns.items():
             card_id = column.get_card_id(issue_id)
             if card_id:
-                return card_id
+                return column_name, card_id
+
+        return None, None
 
     def re_order_issues(self, client, issues):
         for issue in issues.values():
-            column_name, column_id = self.get_matching_column(issue)  # Todo: Add card id to this process ?
+            column_name, column_id = self.get_matching_column(issue)
             if not column_id:
                 continue
 
-            # todo: pass the card object, and delete from the current column
-            card_id = self.get_card_id(issue.id)
-            print(f"Moving card {issue.title} to '{column_name}'")
+            # todo: pass the card object instead of deleting it
+            prev_column_name, card_id = self.get_current_location(issue.id)
+            print(f"Moving card {issue.title} from {prev_column_name} to '{column_name}'")
             self.columns[column_name].add_card(card_id=card_id,
                                                issue_id=issue.id,
                                                issues=issues,
                                                client=client)
 
+            self.columns[prev_column_name].remove_card(card_id)
+
     def remove_issues(self, client, issues):
         for column in self.columns.values():
-            if column.name == 'Done':  # Not going over closed issues, todo: add done column name config
+            if column.name == self.done_column_name:  # Not going over closed issues
                 continue
 
             for card in column.cards:
