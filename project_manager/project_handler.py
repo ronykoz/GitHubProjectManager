@@ -89,7 +89,7 @@ class ProjectManager(object):
             self.project.re_order_issues(self.client, self.matching_issues)
 
 
-def bug_manger():
+def bug_manager():
     priority_list = ['PoC Blocker', 'Critical', 'High', 'Medium', 'Low',
                      f'Customer{SAME_LEVEL_PRIORITY_IDENTIFIER}zendesk']
     manager = ProjectManager(project_owner='demisto',
@@ -103,4 +103,4 @@ def bug_manger():
 
 
 if __name__ == "__main__":
-    bug_manger()
+    bug_manager()
