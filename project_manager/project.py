@@ -1,8 +1,9 @@
 class IssueCard(object):
-    def __init__(self, id, issue_id, cursor=''):
+    def __init__(self, id, issue_id, issue_title, cursor=''):
         self.id = id
         self.cursor = cursor
         self.issue_id = issue_id
+        self.issue_title = issue_title
 
 
 class ProjectColumn(object):
@@ -29,7 +30,8 @@ class ProjectColumn(object):
 
             cards.append(IssueCard(id=card.get('node', {}).get('id'),
                                    issue_id=card_content['id'],
-                                   cursor=card['cursor']))
+                                   cursor=card['cursor'],\
+                                   issue_title=card_content['title']))
 
         return cards
 
@@ -40,7 +42,7 @@ class ProjectColumn(object):
         new_issue = issues[issue_id]
         insert_after_position = len(self.cards) - 1  # In case it should be the lowest issue
         if new_issue > issues[self.cards[0].issue_id]:
-            self.cards.insert(0, IssueCard(id=card_id, issue_id=issue_id))
+            self.cards.insert(0, IssueCard(id=card_id, issue_id=issue_id, issue_title=new_issue.title))
             client.add_to_column(card_id=card_id,
                                  column_id=self.id)
             return
@@ -51,7 +53,7 @@ class ProjectColumn(object):
                 break
 
         self.cards.insert(insert_after_position + 1,
-                          IssueCard(id=card_id, issue_id=issue_id))
+                          IssueCard(id=card_id, issue_id=issue_id, issue_title=new_issue.title))
         client.move_to_specific_place_in_column(card_id=card_id,
                                                 column_id=self.id,
                                                 after_card_id=self.cards[insert_after_position].id)
@@ -167,6 +169,5 @@ class Project(object):
 
             for card in column.cards:
                 if card.issue_id not in issues:
-                    #todo: add title
-                    print(f'Removing issue {card.issue_id} from project')
+                    print(f'Removing issue {card.issue_title} from project')
                     client.delete_project_card(card.id)

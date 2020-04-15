@@ -99,7 +99,7 @@ def bug_manger():
                              filter_labels=["bug"],
                              must_have_labels=["content"],
                              cant_have_labels=["Playbooks"])
-    # manager.manage()
+    manager.manage()
 
 
 if __name__ == "__main__":
