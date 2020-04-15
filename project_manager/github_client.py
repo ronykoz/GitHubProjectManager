@@ -94,6 +94,15 @@ class GraphQLClient(object):
                       edges {
                         cursor
                         node {
+                        comments(last:5){
+                            nodes{
+                              author{
+                                login
+                              }
+                              body
+                              createdAt
+                            }
+                          }
                           timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
                             __typename
                             ... on IssueTimelineItemsConnection{
@@ -170,6 +179,15 @@ class GraphQLClient(object):
                   edges {
                     cursor
                     node {
+                      comments(last:5){
+                        nodes{
+                          author{
+                            login
+                          }
+                          body
+                          createdAt
+                        }
+                      }
                       timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
                         __typename
                         ... on IssueTimelineItemsConnection{

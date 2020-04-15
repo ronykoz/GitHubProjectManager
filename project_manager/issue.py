@@ -1,6 +1,7 @@
 from dateutil.parser import parse
 from typing import List, Dict
 
+from project_manager.comment import Comment
 from project_manager.pull_request import PullRequest
 from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 
@@ -21,6 +22,16 @@ class Issue(object):
         self.set_priority(priority_list)
 
         self.milestone = github_issue['milestone']['title'] if github_issue['milestone'] else github_issue['milestone']
+
+        self.comments = self.extract_comments(github_issue['comments'])
+
+    @staticmethod
+    def extract_comments(github_issue):
+        comments = []
+        for node in github_issue['nodes']:
+            comments.append(Comment(node))
+
+        return comments
 
     def set_priority(self, priority_list: List):
         for index, priority_level in enumerate(priority_list):
