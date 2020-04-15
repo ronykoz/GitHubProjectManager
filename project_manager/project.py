@@ -1,3 +1,8 @@
+from typing import Dict
+
+from project_manager.common import AND, OR
+
+
 class IssueCard(object):
     def __init__(self, id, issue_id, issue_title, cursor=''):
         self.id = id
@@ -83,6 +88,39 @@ class Project(object):
             self.all_issues = self.all_issues.union(column.get_all_issue_ids())
 
         self.done_column_name = done_column_name
+
+    def temp_get_matching_column(self, config: Dict):
+        column_name = ''
+        for tested_column_name, conditions in config.items():
+            is_true = True
+            for condition, condition_value in conditions.items():
+                condition_results = eval(condition)
+                if isinstance(condition_value, list):  # todo: add the option to have not condition
+                    for option in condition_value:
+                        if OR in option:
+                            options = option.split(OR)
+                            if not all([True if option in condition_results else False for option in options]):
+                                is_true = False
+                                break
+
+                        elif option not in condition_results:
+                            is_true = False
+                            break
+
+                elif condition_value != condition_results:
+                    is_true = False
+                    break
+
+            if is_true:
+                column_name = tested_column_name
+                break
+
+        if self.columns.get(column_name):
+            column_id = self.columns[column_name].id
+        else:
+            column_id = ''
+
+        return column_name, column_id
 
     def find_missing_issue_ids(self, issues):
         issues_in_project_keys = set(self.all_issues)
