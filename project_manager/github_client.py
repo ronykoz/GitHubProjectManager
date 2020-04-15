@@ -12,7 +12,7 @@ class GraphQLClient(object):
     BASE_URL = 'https://api.github.com'
 
     def __init__(self):
-        api_key = os.getenv("GITHUB_TOKEN")  # TODO: add explanation
+        api_key = os.getenv("GITHUB_TOKEN")  # TODO: add explanation in readme
         sample_transport = RequestsHTTPTransport(
             url=self.BASE_URL + '/graphql',
             use_json=True,
@@ -233,7 +233,7 @@ class GraphQLClient(object):
             }''', {"after": after, "owner": owner, "name": name, "labels": labels})
 
     def get_github_issues(self, owner, name, labels):
-        if not labels:
+        if not labels:  #todo: check the optional args
             self.execute_query('''
                 query ($owner: String!, $name: String!){
                   repository(owner: $owner, name: $name) {

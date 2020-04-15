@@ -36,6 +36,7 @@ class ProjectManager(object):
         return issues
 
     def get_github_project(self):
+        # Todo: known limitation for now, supporting up to 100 cards in each column for now - can be expanded
         response = self.client.get_github_project(owner=self.project_owner,
                                                   name=self.repository_name,
                                                   number=self.project_number)
@@ -57,13 +58,9 @@ class ProjectManager(object):
                                                                 labels=self.filter_labels)
             issues.get('edges').extend(response.get('repository', {}).get('issues', {}).get('edges'))
 
-        import ipdb
-        ipdb.set_trace()
         return self.construct_issue_object(issues)
 
     def add_issues_to_project(self):
-        import ipdb
-        ipdb.set_trace()
         issues_to_add = self.project.find_missing_issue_ids(self.matching_issues)
         self.project.add_issues(self.client, self.matching_issues, issues_to_add)
 

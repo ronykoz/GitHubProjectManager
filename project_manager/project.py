@@ -9,9 +9,8 @@ class ProjectColumn(object):
     def __init__(self, column_node):
         self.id = column_node['id']
         self.name = column_node['name']
-        self.cards = []
 
-        self.extract_card_node_data(column_node)  # todo: convert to list
+        self.cards = self.extract_card_node_data(column_node)
 
     @staticmethod
     def is_epic(card_content):
@@ -22,14 +21,17 @@ class ProjectColumn(object):
         return False
 
     def extract_card_node_data(self, column_node):
+        cards = []
         for card in column_node['cards']['edges']:
             card_content = card.get('node', {}).get('content')
             if not card_content or self.is_epic(card_content):
                 continue
 
-            self.cards.append(IssueCard(id=card.get('node', {}).get('id'),
-                                        issue_id=card_content['id'],
-                                        cursor=card['cursor']))
+            cards.append(IssueCard(id=card.get('node', {}).get('id'),
+                                   issue_id=card_content['id'],
+                                   cursor=card['cursor']))
+
+        return cards
 
     def get_all_issue_ids(self):
         return {card.issue_id for card in self.cards}
@@ -44,7 +46,7 @@ class ProjectColumn(object):
             return
 
         for i in range(len(self.cards) - 1):
-            if issues[self.cards[i].issue_id] > new_issue and new_issue > issues[self.cards[i + 1].issue_id]:
+            if issues[self.cards[i].issue_id] > new_issue > issues[self.cards[i + 1].issue_id]:
                 insert_after_position = i
                 break
 

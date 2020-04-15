@@ -17,7 +17,7 @@ class Issue(object):
         self.labels = self.get_current_labels(github_issue['labels']['edges'])
         self.labels_information = self.extract_labels_information(github_issue)
 
-        self.priority_rank = None  # Todo: add this here
+        self.priority_rank = None
         self.set_priority(priority_list)
 
         self.milestone = github_issue['milestone']['title'] if github_issue['milestone'] else github_issue['milestone']
@@ -65,7 +65,7 @@ class Issue(object):
                 return PullRequest(timeline_node)
 
     def __gt__(self, other):
-        if self.priority_rank > other.priority_rank:  # todo: Update the priority to be a dynamic enum
+        if self.priority_rank > other.priority_rank:
             return True
 
         elif self.priority_rank == other.priority_rank:
