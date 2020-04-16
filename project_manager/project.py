@@ -190,10 +190,11 @@ class Project(object):
 
         return None, None
 
-    def re_order_issues(self, client, issues):
+    def re_order_issues(self, client, issues, config):
         # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
             column_name, column_id = self.get_matching_column(issue)
+            # column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
             if not column_id:
                 continue
 

@@ -40,6 +40,7 @@ class Configuration(object):
         self.project_number = None
         self.priority_list = []
         self.filter_labels = []
+        self.filter_milestone = ''
         self.must_have_labels = []
         self.cant_have_labels = []
         self.column_names = []
