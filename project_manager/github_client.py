@@ -1,7 +1,7 @@
 import os
-import requests
 
-from gql import gql, Client
+import requests
+from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
 # Disable insecure warnings
@@ -110,7 +110,7 @@ class GraphQLClient(object):
                                 ... on CrossReferencedEvent {
                                   willCloseTarget
                                   source {
-                                    __typename 
+                                    __typename
                                     ... on PullRequest {
                                       state
                                       assignees(first:10){
@@ -129,7 +129,7 @@ class GraphQLClient(object):
                                     }
                                   }
                                 }
-                                __typename 
+                                __typename
                                 ... on LabeledEvent {
                                   label{
                                     name
@@ -195,7 +195,7 @@ class GraphQLClient(object):
                             ... on CrossReferencedEvent {
                               willCloseTarget
                               source {
-                                __typename 
+                                __typename
                                 ... on PullRequest {
                                   state
                                   assignees(first:10){
@@ -214,7 +214,7 @@ class GraphQLClient(object):
                                 }
                               }
                             }
-                            __typename 
+                            __typename
                             ... on LabeledEvent {
                               label{
                                 name

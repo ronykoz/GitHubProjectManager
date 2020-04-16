@@ -1,6 +1,4 @@
-from typing import Dict
-
-from project_manager.common import AND, OR
+from project_manager.common import OR
 from project_manager.configuration import Configuration
 
 
@@ -134,9 +132,10 @@ class Project(object):
         all_matching_issues = set(issues.keys())
         return all_matching_issues - issues_in_project_keys
 
-    def add_issues(self, client, issues, issues_to_add):
+    def add_issues(self, client, issues, issues_to_add, config):
         for issue_id in issues_to_add:
             column_name, column_id = self.get_matching_column(issues[issue_id])
+            # column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
 
             print("Adding issue '{}' to column '{}'".format(issues[issue_id].title, column_name))
             response = client.add_issues_to_project(issue_id, column_id)

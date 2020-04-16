@@ -1,8 +1,8 @@
-from project_manager.issue import Issue
-from project_manager.project import Project
-from project_manager.github_client import GraphQLClient
 from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 from project_manager.configuration import Configuration
+from project_manager.github_client import GraphQLClient
+from project_manager.issue import Issue
+from project_manager.project import Project
 
 
 class ProjectManager(object):
@@ -78,15 +78,17 @@ class ProjectManager(object):
         return self.construct_issue_object(issues, must_have_labels, cant_have_labels)
 
     def add_issues_to_project(self):
+        config = Configuration(conf_file_path='project_manager/project_conf.ini')
+        config.load_properties()
         issues_to_add = self.project.find_missing_issue_ids(self.matching_issues)
-        self.project.add_issues(self.client, self.matching_issues, issues_to_add)
+        self.project.add_issues(self.client, self.matching_issues, issues_to_add, config)
 
     def manage(self, add_issues=True, remove_non_matching=True, order_issues=True):
+        if remove_non_matching:  # Better to first remove issues that should not be in the board
+            self.project.remove_issues(self.client, self.matching_issues)
+
         if add_issues:
             self.add_issues_to_project()
-
-        if remove_non_matching:
-            self.project.remove_issues(self.client, self.matching_issues)
 
         if order_issues:
             self.project.re_order_issues(self.client, self.matching_issues)

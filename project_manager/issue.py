@@ -1,9 +1,9 @@
-from dateutil.parser import parse
-from typing import List, Dict
+from typing import Dict, List
 
+from dateutil.parser import parse
 from project_manager.comment import Comment
-from project_manager.pull_request import PullRequest
 from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
+from project_manager.pull_request import PullRequest
 
 
 class Issue(object):

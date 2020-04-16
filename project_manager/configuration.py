@@ -1,7 +1,5 @@
 from configparser import ConfigParser
 
-from project_manager.common import AND, OR
-
 
 class Configuration(object):
     DELIMITER = ','
@@ -86,14 +84,14 @@ class Configuration(object):
                     raise ValueError(self.ILLEGAL_QUERY.format(key))
                 value = self.config[section][key]
 
-                if key in self.CONDITIONAL_LIST_ATTRIBUTES:
-                    value = value.split(self.DELIMITER)
-
                 if value in ['true', 'True']:
                     value = True
 
                 if value in ['false', 'False']:
                     value = False
+
+                if key in self.CONDITIONAL_LIST_ATTRIBUTES and not isinstance(value, bool):
+                    value = value.split(self.DELIMITER)
 
                 self.column_to_rules[section][key] = value
 
