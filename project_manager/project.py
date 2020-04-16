@@ -193,19 +193,19 @@ class Project(object):
     def re_order_issues(self, client, issues, config):
         # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
-            column_name, column_id = self.get_matching_column(issue)
+            column_name_before, card_id = self.get_current_location(issue.id)
+            column_name_after, column_id = self.get_matching_column(issue)
             # column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
-            if not column_id:
+            if not column_id or (column_name_after == column_name_before and not self.config.sort):
                 continue
 
-            prev_column_name, card_id = self.get_current_location(issue.id)
-            print(f"Moving card {issue.title} from {prev_column_name} to '{column_name}'")
-            self.columns[column_name].add_card(card_id=card_id,
-                                               issue_id=issue.id,
-                                               issues=issues,
-                                               client=client)
+            print(f"Moving card {issue.title} from {column_name_before} to '{column_name_after}'")
+            self.columns[column_name_after].add_card(card_id=card_id,
+                                                     issue_id=issue.id,
+                                                     issues=issues,
+                                                     client=client)
 
-            self.columns[prev_column_name].remove_card(card_id)
+            self.columns[column_name_before].remove_card(card_id)
 
     def remove_issues(self, client, issues):
         for column in self.columns.values():

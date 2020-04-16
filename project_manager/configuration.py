@@ -46,6 +46,12 @@ class Configuration(object):
         self.column_names = []
         self.column_rule_desc_order = []
 
+        # Actions  todo: configure these
+        self.remove = False
+        self.add = False
+        self.move = False
+        self.sort = False
+
         # Conditional
         self.column_to_rules = {}
 
