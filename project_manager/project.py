@@ -1,6 +1,7 @@
 from typing import Dict
 
 from project_manager.common import AND, OR
+from project_manager.configuration import Configuration
 
 
 class IssueCard(object):
@@ -89,11 +90,10 @@ class Project(object):
 
         self.done_column_name = done_column_name
 
-    def temp_get_matching_column(self, issue, config: Dict):
-        import ipdb
-        ipdb.set_trace()
+    def temp_get_matching_column(self, issue, config: Configuration):
         column_name = ''
-        for tested_column_name, conditions in config.items():
+        for tested_column_name in config.column_rule_desc_order:
+            conditions = config.column_to_rules[tested_column_name]
             is_true = True
             for condition, condition_value in conditions.items():
                 condition_results = eval(condition)

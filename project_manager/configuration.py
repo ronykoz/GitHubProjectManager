@@ -10,7 +10,8 @@ class Configuration(object):
         'filter_labels',
         'must_have_labels',
         'cant_have_labels',
-        'column_order'
+        'column_names',
+        'column_rule_desc_order'
     ]
     CONDITIONAL_LIST_ATTRIBUTES = [
         'issue.assignees',
@@ -26,7 +27,7 @@ class Configuration(object):
         'issue.pull_request.assignees'
     ]  # TODO: load this list dynamically from the project
 
-    SECTION_NAME_ERROR = 'You have either added a section which is not in the column_order key in the ' \
+    SECTION_NAME_ERROR = 'You have either added a section which is not in the column_names key in the ' \
                          'General section, or miss-spelled. The section name is {}'
     ILLEGAL_QUERY = "You have entered an illegal query - {}, the possible options are:\n" + '\n'.join(PERMITTED_QUERIES)
 
@@ -43,7 +44,8 @@ class Configuration(object):
         self.filter_labels = []
         self.must_have_labels = []
         self.cant_have_labels = []
-        self.column_order = []
+        self.column_names = []
+        self.column_rule_desc_order = []
 
         # Conditional
         self.column_to_rules = {}
@@ -75,7 +77,7 @@ class Configuration(object):
             if 'General' == section:
                 continue
 
-            if section not in self.column_order:
+            if section not in self.column_names:
                 raise ValueError(self.SECTION_NAME_ERROR.format(section))
 
             self.column_to_rules[section] = {}

@@ -22,10 +22,9 @@ class ProjectManager(object):
         self.filter_milestone = filter_milestone
 
         self.project = self.get_github_project(done_column_name)
-        self.matching_issues = self.get_github_issues(must_have_labels, cant_have_labels)  # todo: add the option to add more filters
-        conf = Configuration('project_manager/project_conf.ini')
-        conf.load_properties()
-        self.project.temp_get_matching_column(self.matching_issues['MDU6SXNzdWU2MDAwMDE0ODk='], conf.column_to_rules)
+
+        # todo: add the option to add more filters
+        self.matching_issues = self.get_github_issues(must_have_labels, cant_have_labels)
 
     @staticmethod
     def is_matching_issue(issue_labels, must_have_labels, cant_have_labels):
@@ -103,7 +102,7 @@ def bug_manager():
                              filter_labels=["bug"],
                              must_have_labels=["content"],
                              cant_have_labels=["Playbooks"])
-    # manager.manage()
+    manager.manage()
 
 
 if __name__ == "__main__":
