@@ -31,6 +31,7 @@ def test_loading_configuration():
     assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.review_requests'] is True
     assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.assignees'] == ['ronykoz']
 
+
 def test_loading_illegal_configuration():
     configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'illegal_conf.ini'))
     with pytest.raises(ValueError) as exception:
