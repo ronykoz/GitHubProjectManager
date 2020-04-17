@@ -9,6 +9,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install tox
-      - name: Install dependencies
+      - name: Run tests
         run: |
           tox -e py37 -v
