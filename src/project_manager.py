@@ -1,4 +1,3 @@
-from src.common import SAME_LEVEL_PRIORITY_IDENTIFIER
 from src.configuration import Configuration
 from src.github_client import GraphQLClient
 from src.issue import Issue

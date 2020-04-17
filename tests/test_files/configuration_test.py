@@ -1,8 +1,7 @@
 import os
+
 import pytest
-
 from src.configuration import Configuration
-
 
 MOCK_FOLDER_PATH = os.path.join(os.getcwd(), "tests", "mock_data")
 
@@ -10,7 +9,7 @@ MOCK_FOLDER_PATH = os.path.join(os.getcwd(), "tests", "mock_data")
 def test_loading_configuration():
     configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'conf.ini'))
     configuration.load_properties()
-    
+
     assert configuration.closed_issues_column == 'Done'
     assert configuration.project_owner == 'ronykoz'
     assert configuration.repository_name == 'test'

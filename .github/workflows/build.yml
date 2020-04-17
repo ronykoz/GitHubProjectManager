@@ -1,0 +1,14 @@
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pip install tox
+      - name: Install dependencies
+        run: |
+          tox -e py37 -v

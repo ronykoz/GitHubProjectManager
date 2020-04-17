@@ -1,22 +1,22 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
-
-with open('README.md', 'r') as f:
+with open('./README.md', 'r') as f:
     readme = f.read()
 
 
 setup(
     name='GitHubProjectManager',
-    version='0.1',
     url='https://github.com/ronykoz/GitHubProjectManager',
     license='MIT',
     author='Rony Kozakish',
     author_email='',
     description='GitHub automatic project manager tool',
-    install_requires=requirements,
+    install_requires=[
+        'click',
+        'requests',
+        'python-dateutil',
+        'gql'
+    ],
     packages=find_packages(),
     include_package_data=True,
     keywords=[
