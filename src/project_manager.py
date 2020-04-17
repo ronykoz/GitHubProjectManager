@@ -1,32 +1,19 @@
-from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
-from project_manager.configuration import Configuration
-from project_manager.github_client import GraphQLClient
-from project_manager.issue import Issue
-from project_manager.project import Project
+from src.common import SAME_LEVEL_PRIORITY_IDENTIFIER
+from src.configuration import Configuration
+from src.github_client import GraphQLClient
+from src.issue import Issue
+from src.project import Project
 
 
 class ProjectManager(object):
     DEFAULT_PRIORITY_LIST = ['Critical', 'High', 'Medium', 'Low']
 
-    def __init__(self, configuration: Configuration, project_owner='', repository_name='', project_number='',
-                 priority_list=None, client=None, filter_labels=None, filter_milestone=None, must_have_labels=(),
-                 cant_have_labels=(), done_column_name='Done', api_key=None):
+    def __init__(self, configuration: Configuration, client=None, api_key=None):
         self.config = configuration
         self.client = client if client else GraphQLClient(api_key)
 
-        # self.project_owner = project_owner
-        # self.repository_name = repository_name
-        # self.project_number = project_number
-        #
-        # self.priority_list = priority_list if priority_list else self.DEFAULT_PRIORITY_LIST
-        #
-        # self.filter_labels = filter_labels if filter_labels else []
-        # self.filter_milestone = filter_milestone
-
-        self.project = self.get_github_project(done_column_name)
-
-        # todo: add the option to add more filters
-        self.matching_issues = self.get_github_issues()
+        self.project = self.get_github_project(self.config.closed_issues_column)
+        self.matching_issues = self.get_github_issues()  # todo: add the option to add more filters
 
     @staticmethod
     def is_matching_issue(issue_labels, must_have_labels, cant_have_labels):
@@ -83,28 +70,15 @@ class ProjectManager(object):
         issues_to_add = self.project.find_missing_issue_ids(self.matching_issues)
         self.project.add_issues(self.client, self.matching_issues, issues_to_add, self.config)
 
-    def manage(self, add_issues=True, remove_non_matching=True, order_issues=True):
-        if remove_non_matching:  # Better to first remove issues that should not be in the board
+    def manage(self):
+        if self.config.remove:  # Better to first remove issues that should not be in the board
             self.project.remove_issues(self.client, self.matching_issues)
 
-        if add_issues:
+        if self.config.add:
             self.add_issues_to_project()
 
-        if order_issues:
+        if self.config.move:
             self.project.re_order_issues(self.client, self.matching_issues, self.config)
-
-
-# def bug_manager():
-#     priority_list = ['PoC Blocker', 'Critical', 'High', 'Medium', 'Low',
-#                      f'Customer{SAME_LEVEL_PRIORITY_IDENTIFIER}zendesk']
-#     manager = ProjectManager(project_owner='demisto',
-#                              repository_name='etc',
-#                              project_number=31,
-#                              priority_list=priority_list,
-#                              filter_labels=["bug"],
-#                              must_have_labels=["content"],
-#                              cant_have_labels=["Playbooks"])
-#     manager.manage()
 
 
 def bug_manager_config():

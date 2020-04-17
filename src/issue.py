@@ -1,9 +1,9 @@
 from typing import Dict, List
 
 from dateutil.parser import parse
-from project_manager.comment import Comment
-from project_manager.common import SAME_LEVEL_PRIORITY_IDENTIFIER
-from project_manager.pull_request import PullRequest
+from src.comment import Comment
+from src.common import SAME_LEVEL_PRIORITY_IDENTIFIER
+from src.pull_request import PullRequest
 
 
 class Issue(object):

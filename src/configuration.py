@@ -24,13 +24,23 @@ class Configuration(object):
         'issue.pull_request.review_completed',
         'issue.pull_request.assignees'
     ]  # TODO: load this list dynamically from the project
+    GENERAL_SECTIONS = [
+        'General',
+        'Actions'
+    ]
+    OPTIONAL_ACTIONS = [
+        'remove',
+        'add',
+        'move',
+        'sort'
+    ]
 
     SECTION_NAME_ERROR = 'You have either added a section which is not in the column_names key in the ' \
                          'General section, or miss-spelled. The section name is {}'
     ILLEGAL_QUERY = "You have entered an illegal query - {}, the possible options are:\n" + '\n'.join(PERMITTED_QUERIES)
 
     def __init__(self, conf_file_path):
-        self.config = ConfigParser()
+        self.config = ConfigParser(allow_no_value=True)
         self.config.read(conf_file_path)
 
         # General
@@ -46,7 +56,7 @@ class Configuration(object):
         self.column_names = []
         self.column_rule_desc_order = []
 
-        # Actions  todo: configure these
+        # Actions
         self.remove = False
         self.add = False
         self.move = False
@@ -77,9 +87,16 @@ class Configuration(object):
 
             self.custom_set_attr(key, self.config['General'][key])
 
+    def load_actions(self):
+        for key in self.config['Actions']:
+            if key not in self.OPTIONAL_ACTIONS:
+                raise ValueError(f'Provided illegal key - {key} in Actions section')
+
+            self.__setattr__(key, True)
+
     def load_column_rules(self):
         for section in self.config.sections():
-            if 'General' == section:
+            if section in self.GENERAL_SECTIONS:
                 continue
 
             if section not in self.column_names:
@@ -104,9 +121,5 @@ class Configuration(object):
 
     def load_properties(self):
         self.load_general_properties()
+        self.load_actions()
         self.load_column_rules()
-
-
-if __name__ == '__main__':
-    conf = Configuration('project_manager/project_conf.ini')
-    conf.load_properties()

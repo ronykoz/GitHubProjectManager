@@ -1,5 +1,5 @@
-from project_manager.common import OR
-from project_manager.configuration import Configuration
+from src.common import OR
+from src.configuration import Configuration
 
 
 class IssueCard(object):
@@ -94,12 +94,17 @@ class Project(object):
             conditions = config.column_to_rules[tested_column_name]
             is_true = True
             for condition, condition_value in conditions.items():
-                condition_results = eval(condition)
+                try:
+                    condition_results = eval(condition)
+                except TypeError:
+                    is_true = False
+                    break
+
                 if isinstance(condition_value, list):  # todo: add the option to have not condition
                     for option in condition_value:
                         if OR in option:
                             options = option.split(OR)
-                            if not all([True if option in condition_results else False for option in options]):
+                            if not any([True if option in condition_results else False for option in options]):
                                 is_true = False
                                 break
 
@@ -108,7 +113,7 @@ class Project(object):
                             break
 
                 elif isinstance(condition_value, bool):
-                    if (condition_value and not condition_results) or (not condition_value and condition_results):
+                    if condition_value is not bool(condition_results):
                         is_true = False
                         break
 
@@ -135,7 +140,12 @@ class Project(object):
     def add_issues(self, client, issues, issues_to_add, config):
         for issue_id in issues_to_add:
             column_name, column_id = self.get_matching_column(issues[issue_id])
-            # column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
+            import ipdb
+            ipdb.set_trace()
+            column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
+            if column_name not in config.column_names:
+                raise Exception(f"Did not found a matching column for your issue, please check your configuration "
+                                f"file. The issue was {issues[issue_id].title}")
 
             print("Adding issue '{}' to column '{}'".format(issues[issue_id].title, column_name))
             response = client.add_issues_to_project(issue_id, column_id)
@@ -194,11 +204,12 @@ class Project(object):
         # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
             column_name_before, card_id = self.get_current_location(issue.id)
-            column_name_after, column_id = self.get_matching_column(issue)
-            # column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
-            if not column_id or (column_name_after == column_name_before and not self.config.sort):
+            column_name_after, column_id = self.temp_get_matching_column(issue, config)
+            if not column_id or (column_name_after == column_name_before and not config.sort):
                 continue
 
+            import ipdb
+            ipdb.set_trace()
             print(f"Moving card {issue.title} from {column_name_before} to '{column_name_after}'")
             self.columns[column_name_after].add_card(card_id=card_id,
                                                      issue_id=issue.id,
@@ -214,5 +225,7 @@ class Project(object):
 
             for card in column.cards:
                 if card.issue_id not in issues:
+                    import ipdb
+                    ipdb.set_trace()
                     print(f'Removing issue {card.issue_title} from project')
                     client.delete_project_card(card.id)
