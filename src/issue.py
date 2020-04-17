@@ -23,7 +23,7 @@ class Issue(object):
 
         self.milestone = github_issue['milestone']['title'] if github_issue['milestone'] else github_issue['milestone']
 
-        self.comments = self.extract_comments(github_issue['comments'])[:-5]
+        self.last_comments = self.extract_comments(github_issue['comments'])[:-5]
 
     @staticmethod
     def extract_comments(github_issue):

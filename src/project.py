@@ -77,7 +77,7 @@ class ProjectColumn(object):
 
 
 class Project(object):
-    def __init__(self, git_hub_project, done_column_name):
+    def __init__(self, git_hub_project, done_column_name='Done'):
         self.all_issues = set()
         self.columns = {}
         for column_node in git_hub_project['columns']['nodes']:
