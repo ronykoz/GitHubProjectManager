@@ -5,6 +5,11 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        python-version: [3.7]
     steps:
       - name: Install dependencies
         run: |
