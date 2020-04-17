@@ -19,7 +19,7 @@ class Configuration(object):
     PERMITTED_QUERIES = [
         'issue.assignees',
         'issue.pull_request',
-        'issue.pull_request.review_requests',
+        'issue.pull_request.review_requested',
         'issue.labels',
         'issue.pull_request.review_completed',
         'issue.pull_request.assignees'

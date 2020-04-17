@@ -172,7 +172,7 @@ class Project(object):
                 column_name = 'Queue'
 
         elif issue.assignees:
-            if issue.pull_request and issue.pull_request.review_requests:
+            if issue.pull_request and issue.pull_request.review_requested:
                 if issue.pull_request.review_completed and 'kirbles19' in issue.pull_request.assignees:
                     if not self.is_in_column('Waiting for Docs', issue.id):
                         column_name = 'Waiting for Docs'

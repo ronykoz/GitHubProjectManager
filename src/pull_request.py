@@ -2,11 +2,11 @@ class PullRequest(object):
     def __init__(self, pull_request_node):
         self.number = pull_request_node['source']['number']
         self.assignees = self.get_assignees(pull_request_node['source']['assignees']['nodes'])
-        self.review_requests = self.is_review_ready(pull_request_node['source'])
+        self.review_requested = self.is_review_requested(pull_request_node['source'])
         self.review_completed = False if pull_request_node['source']['reviewDecision'] != 'APPROVED' else True
 
     @staticmethod
-    def is_review_ready(pull_request_source):
+    def is_review_requested(pull_request_source):
         if pull_request_source['reviewRequests']['totalCount'] or pull_request_source['reviews']['totalCount']:
             return True
 

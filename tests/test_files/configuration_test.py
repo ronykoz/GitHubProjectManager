@@ -28,7 +28,7 @@ def test_loading_configuration():
     assert configuration.move is True
     assert configuration.sort is False
 
-    assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.review_requests'] is True
+    assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.review_requested'] is True
     assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.assignees'] == ['ronykoz']
 
 
