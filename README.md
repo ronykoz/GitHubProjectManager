@@ -1,4 +1,5 @@
 [![](https://github.com/ronykoz/GitHubProjectManager/workflows/Python%20package/badge.svg)](https://github.com/ronykoz/GitHubProjectManager/actions?query=branch%3Amaster)
+[![Coverage Status](https://coveralls.io/repos/github/ronykoz/GitHubProjectManager/badge.svg?branch=add-coverage)](https://coveralls.io/github/ronykoz/GitHubProjectManager?branch=add-coverage)
 
 # GitHubProjectManager
 This tool will help you maintain your project in GitHub with ease.

@@ -5,11 +5,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        python-version: [3.7]
 
     steps:
       - uses: actions/checkout@v2
@@ -20,6 +15,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install tox
+          pip install coveralls
       - name: Run tests
         run: |
-          tox -e py37 -v
+          tox -e py37 -v -- --cov=src
+      - name: Upload to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.coverage }}
+        run: |
+          coveralls
