@@ -2,14 +2,18 @@
 [![Coverage Status](https://coveralls.io/repos/github/ronykoz/GitHubProjectManager/badge.svg?branch=add-coverage)](https://coveralls.io/github/ronykoz/GitHubProjectManager?branch=add-coverage)
 
 # GitHubProjectManager
-This tool will help you maintain your project in GitHub with ease.
+This tool will help you maintain and organize your GitHub project using an automation tool.
 
-We offer a functionality of managing your board in GitHub project.
-This is by searching for the issues you define, The supported functionality is:
-* adding - Adding new issues to your board.
-* moving - Moving issues to the correct column of your project.
-* sorting - Sorting your issues within your existing columns.
-* removing - Removing issues that fail to meet your issue filters.
+## Use case
+In case you work with GitHub projects, and maintain a board for your project this tool is for you.
+As we offer a functionality of managing your board in GitHub project boards.
+This is by searching for the issues you wish to include in the board(By a set of filter you provide) and placing them in the right place in your board for you - both in the correct column and the correct place within the column.
+
+The supported functionality is:
+* Adding new issues to your board.
+* Moving issues to the correct column of your project, with the priority in mind.
+* Sorting your issues within your existing columns by their priorities and creation times.
+* Removing issues that fail to meet your issue filters.
 
 ___
 In order to configure GitHubProjectManager you will neet to create an `.ini` file, here is an example:
