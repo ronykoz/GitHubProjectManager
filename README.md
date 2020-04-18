@@ -62,3 +62,7 @@ ___
 There are two options to run the tool:
 1. Configure an `.ini` file like described above and then using the `GitHubProjectManager manage -c <path to ini>` command - better with a cronjob to order your board automatically.
 2. Import the code and create some more custom rules for your self, like importing issues from another board(FYI this will be added to the tool as well).
+
+#### Token
+In any solution you will have to set an envioroonment variable `GITHUB_TOKEN` which is the token you will generate in order for the tool to connect to your GitHub project.
+Although we do offer the option to pass that along with your client object while taking the API option(Usage case number 2).
