@@ -1,4 +1,6 @@
-from src.pull_request import PullRequest
+from __future__ import absolute_import
+
+from GitHubProjectManager.core.issue.pull_request import PullRequest
 
 
 def test_pull_request():

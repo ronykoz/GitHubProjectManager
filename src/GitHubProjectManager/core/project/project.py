@@ -1,5 +1,7 @@
-from src.common import OR
-from src.configuration import Configuration
+from __future__ import absolute_import
+
+from GitHubProjectManager.common.constants import OR
+from GitHubProjectManager.management.configuration import Configuration
 
 
 class IssueCard(object):
@@ -88,7 +90,7 @@ class Project(object):
 
         self.done_column_name = done_column_name
 
-    def temp_get_matching_column(self, issue, config: Configuration):
+    def get_matching_column(self, issue, config: Configuration):
         column_name = ''
         for tested_column_name in config.column_rule_desc_order:
             conditions = config.column_to_rules[tested_column_name]
@@ -139,10 +141,7 @@ class Project(object):
 
     def add_issues(self, client, issues, issues_to_add, config):
         for issue_id in issues_to_add:
-            column_name, column_id = self.get_matching_column(issues[issue_id])
-            import ipdb
-            ipdb.set_trace()
-            column_name, column_id = self.temp_get_matching_column(issues[issue_id], config)
+            column_name, column_id = self.get_matching_column(issues[issue_id], config)
             if column_name not in config.column_names:
                 raise Exception(f"Did not found a matching column for your issue, please check your configuration "
                                 f"file. The issue was {issues[issue_id].title}")
@@ -161,37 +160,6 @@ class Project(object):
 
         return False
 
-    def get_matching_column(self, issue):  # todo: have this configurable
-        column_name = ''
-        if 'PendingSupport' in issue.labels or 'PendingVerification' in issue.labels:
-            if not self.is_in_column('Pending Support', issue.id):
-                column_name = 'Pending Support'
-
-        elif not issue.assignees:
-            if not self.is_in_column('Queue', issue.id):
-                column_name = 'Queue'
-
-        elif issue.assignees:
-            if issue.pull_request and issue.pull_request.review_requested:
-                if issue.pull_request.review_completed and 'kirbles19' in issue.pull_request.assignees:
-                    if not self.is_in_column('Waiting for Docs', issue.id):
-                        column_name = 'Waiting for Docs'
-
-                else:
-                    if not self.is_in_column('Review in progress', issue.id):
-                        column_name = 'Review in progress'
-
-            else:
-                if not self.is_in_column('In progress', issue.id):
-                    column_name = 'In progress'
-
-        if self.columns.get(column_name):
-            column_id = self.columns[column_name].id
-        else:
-            column_id = ''
-
-        return column_name, column_id
-
     def get_current_location(self, issue_id):
         for column_name, column in self.columns.items():
             card_id = column.get_card_id(issue_id)
@@ -204,7 +172,7 @@ class Project(object):
         # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
             column_name_before, card_id = self.get_current_location(issue.id)
-            column_name_after, column_id = self.temp_get_matching_column(issue, config)
+            column_name_after, column_id = self.get_matching_column(issue, config)
             if not column_id or (column_name_after == column_name_before and not config.sort):
                 continue
 
@@ -225,7 +193,5 @@ class Project(object):
 
             for card in column.cards:
                 if card.issue_id not in issues:
-                    import ipdb
-                    ipdb.set_trace()
                     print(f'Removing issue {card.issue_title} from project')
                     client.delete_project_card(card.id)

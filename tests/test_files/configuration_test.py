@@ -1,13 +1,16 @@
+from __future__ import absolute_import
+
 import os
 
 import pytest
-from src.configuration import Configuration
+from GitHubProjectManager.management.configuration import Configuration
 
 MOCK_FOLDER_PATH = os.path.join(os.getcwd(), "tests", "mock_data")
 
 
 def test_loading_configuration():
     configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'conf.ini'))
+    assert 'General' in configuration.config.sections()
     configuration.load_properties()
 
     assert configuration.closed_issues_column == 'Done'

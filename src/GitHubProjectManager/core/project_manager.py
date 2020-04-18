@@ -1,7 +1,9 @@
-from src.configuration import Configuration
-from src.github_client import GraphQLClient
-from src.issue import Issue
-from src.project import Project
+from __future__ import absolute_import
+
+from GitHubProjectManager.core.issue.issue import Issue
+from GitHubProjectManager.core.project.project import Project
+from GitHubProjectManager.management.configuration import Configuration
+from GitHubProjectManager.management.github_client import GraphQLClient
 
 
 class ProjectManager(object):

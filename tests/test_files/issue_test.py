@@ -1,5 +1,7 @@
-from src.issue import Issue
-from src.project_manager import ProjectManager
+from __future__ import absolute_import
+
+from GitHubProjectManager.core.issue.issue import Issue
+from GitHubProjectManager.core.project_manager import ProjectManager
 
 
 def test_issue_params():
@@ -9,8 +11,8 @@ def test_issue_params():
     assignee = "ronykoz"
 
     issue = Issue({
-            "comments": {
-                "nodes": [
+        "comments": {
+            "nodes": [
                     {
                         "author": {
                             "login": "ronykoz"
@@ -18,80 +20,80 @@ def test_issue_params():
                         "body": "comment 1",
                         "createdAt": "2019-03-19T12:24:27Z"
                     },
-                    {
+                {
                         "author": {
                             "login": "ronykoz"
                         },
                         "body": "second comment",
                         "createdAt": "2019-03-19T12:27:53Z"
                     },
-                    {
+                {
                         "author": {
                             "login": "ronykoz"
                         },
                         "body": "third comment",
                         "createdAt": "2019-03-19T12:52:08Z"
                     }
-                ]
-            },
-            "timelineItems": {
-                "__typename": "IssueTimelineItemsConnection",
-                "nodes": [
-                    {
-                        "__typename": "LabeledEvent",
-                        "label": {
-                            "name": labels[0]
-                        },
-                        "createdAt": "2019-03-15T12:40:22Z"
+            ]
+        },
+        "timelineItems": {
+            "__typename": "IssueTimelineItemsConnection",
+            "nodes": [
+                {
+                    "__typename": "LabeledEvent",
+                    "label": {
+                        "name": labels[0]
                     },
-                    {
-                        "__typename": "LabeledEvent",
-                        "label": {
-                            "name": labels[1]
-                        },
-                        "createdAt": "2019-03-17T13:59:27Z"
+                    "createdAt": "2019-03-15T12:40:22Z"
+                },
+                {
+                    "__typename": "LabeledEvent",
+                    "label": {
+                        "name": labels[1]
                     },
-                    {
-                        "__typename": "LabeledEvent",
-                        "label": {
-                            "name": labels[2]
-                        },
-                        "createdAt": "2019-04-08T10:48:02Z"
+                    "createdAt": "2019-03-17T13:59:27Z"
+                },
+                {
+                    "__typename": "LabeledEvent",
+                    "label": {
+                        "name": labels[2]
+                    },
+                    "createdAt": "2019-04-08T10:48:02Z"
+                }
+            ]
+        },
+        "title": title,
+        "id": issue_id,
+        "number": 1,
+        "milestone": None,
+        "labels": {
+            "edges": [
+                {
+                    "node": {
+                        "name": labels[0]
                     }
-                ]
-            },
-            "title": title,
-            "id": issue_id,
-            "number": 1,
-            "milestone": None,
-            "labels": {
-                "edges": [
-                    {
-                        "node": {
-                            "name": labels[0]
-                        }
-                    },
-                    {
-                        "node": {
-                            "name": labels[1]
-                        }
-                    },
-                    {
-                        "node": {
-                            "name": labels[2]
-                        }
+                },
+                {
+                    "node": {
+                        "name": labels[1]
                     }
-                ]
-            },
-            "assignees": {
-                "edges": [
-                    {
-                        "node": {
-                            "login": assignee
-                        }
+                },
+                {
+                    "node": {
+                        "name": labels[2]
                     }
-                ]
-            }
+                }
+            ]
+        },
+        "assignees": {
+            "edges": [
+                {
+                    "node": {
+                        "login": assignee
+                    }
+                }
+            ]
+        }
     }, ProjectManager.DEFAULT_PRIORITY_LIST)
 
     assert issue.id == issue_id

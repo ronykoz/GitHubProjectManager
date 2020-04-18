@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+
 import os
 
 import pytest
 from click.testing import CliRunner
-from src.cli import main
-from src.common import MANAGE_COMMAND_NAME
+from GitHubProjectManager.cli.main import main
+from GitHubProjectManager.common.constants import MANAGE_COMMAND_NAME
 
 MOCK_FOLDER_PATH = os.path.join(os.getcwd(), "tests", "mock_data")
 

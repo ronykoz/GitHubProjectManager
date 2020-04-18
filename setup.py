@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from setuptools import find_packages, setup
 
 with open('./README.md', 'r') as f:
@@ -17,7 +19,8 @@ setup(
         'python-dateutil',
         'gql'
     ],
-    packages=find_packages(),
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     include_package_data=True,
     keywords=[
         "GitHub",
@@ -32,7 +35,7 @@ setup(
     long_description_content_type='text/markdown',
     python_requires=">=3.7",
     entry_points={
-        'console_scripts': ['GitHubProjectManager = src.cli:main']
+        'console_scripts': ['GitHubProjectManager = GitHubProjectManager.cli.main:main']
     },
     classifiers=[
         'Natural Language :: English',

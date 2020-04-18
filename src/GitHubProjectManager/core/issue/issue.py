@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 from typing import Dict, List
 
 from dateutil.parser import parse
-from src.comment import Comment
-from src.common import SAME_LEVEL_PRIORITY_IDENTIFIER
-from src.pull_request import PullRequest
+from GitHubProjectManager.common.constants import \
+    SAME_LEVEL_PRIORITY_IDENTIFIER
+from GitHubProjectManager.core.issue.comment import Comment
+from GitHubProjectManager.core.issue.pull_request import PullRequest
 
 
 class Issue(object):

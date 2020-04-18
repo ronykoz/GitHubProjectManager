@@ -1,12 +1,13 @@
+from __future__ import absolute_import
+
 import sys
 
 from pkg_resources import get_distribution
 
 import click
-
-from src.project_manager import ProjectManager
-from src.configuration import Configuration
-from src.common import MANAGE_COMMAND_NAME
+from GitHubProjectManager.common.constants import MANAGE_COMMAND_NAME
+from GitHubProjectManager.core.project_manager import ProjectManager
+from GitHubProjectManager.management.configuration import Configuration
 
 
 @click.group(invoke_without_command=True, no_args_is_help=True, context_settings=dict(max_content_width=100), )

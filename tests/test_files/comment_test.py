@@ -1,4 +1,6 @@
-from src.comment import Comment
+from __future__ import absolute_import
+
+from GitHubProjectManager.core.issue.comment import Comment
 
 
 def test_comment_to_readable():
