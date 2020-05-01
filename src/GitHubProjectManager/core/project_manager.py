@@ -73,10 +73,13 @@ class ProjectManager(object):
 
     def manage(self):
         if self.config.remove:  # Better to first remove issues that should not be in the board
-            self.project.remove_issues(self.client, self.matching_issues)
+            self.project.remove_issues(self.client, self.matching_issues, self.config)
 
         if self.config.add:
             self.add_issues_to_project()
+
+        if self.config.sort:
+            self.project.sort_issues_in_columns(self.client, self.config, self.matching_issues)
 
         if self.config.move:
             self.project.re_order_issues(self.client, self.matching_issues, self.config)

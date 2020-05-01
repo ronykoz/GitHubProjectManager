@@ -1,3 +1,5 @@
+import logging
+import os
 from configparser import ConfigParser
 
 
@@ -14,7 +16,8 @@ class Configuration(object):
     CONDITIONAL_LIST_ATTRIBUTES = [
         'issue.assignees',
         'issue.labels',
-        'issue.pull_request.assignees'
+        'issue.pull_request.assignees',
+        'issue.pull_request.labels'
     ]
     PERMITTED_QUERIES = [
         'issue.assignees',
@@ -22,7 +25,8 @@ class Configuration(object):
         'issue.pull_request.review_requested',
         'issue.labels',
         'issue.pull_request.review_completed',
-        'issue.pull_request.assignees'
+        'issue.pull_request.assignees',
+        'issue.pull_request.labels'
     ]  # TODO: load this list dynamically from the project
     GENERAL_SECTIONS = [
         'General',
@@ -39,7 +43,7 @@ class Configuration(object):
                          'General section, or miss-spelled. The section name is {}'
     ILLEGAL_QUERY = "You have entered an illegal query - {}, the possible options are:\n" + '\n'.join(PERMITTED_QUERIES)
 
-    def __init__(self, conf_file_path):
+    def __init__(self, conf_file_path, verbose=2, quiet=False, log_path=''):
         self.config = ConfigParser(allow_no_value=True)
         self.config.read(conf_file_path)
 
@@ -64,6 +68,8 @@ class Configuration(object):
 
         # Conditional
         self.column_to_rules = {}
+
+        self.logger = self.logging_setup(verbose, quiet, log_path)
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
@@ -123,3 +129,29 @@ class Configuration(object):
         self.load_general_properties()
         self.load_actions()
         self.load_column_rules()
+
+    @staticmethod
+    def logging_setup(verbose, quiet, log_path):
+        if quiet:
+            verbose = 0
+
+        logger: logging.Logger = logging.getLogger('GitHubProjectManager')
+        logger.setLevel(logging.DEBUG)
+        log_level = logging.getLevelName((6 - 2 * verbose) * 10)
+        fmt = logging.Formatter('%(message)s')
+
+        if verbose:
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(log_level)
+            console_handler.setFormatter(fmt)
+            logger.addHandler(console_handler)
+
+        if log_path:
+            file_handler = logging.FileHandler(filename=os.path.join(log_path, 'GitHubProjectManager.log'))
+            file_handler.setFormatter(fmt)
+            file_handler.setLevel(level=logging.DEBUG)
+            logger.addHandler(file_handler)
+
+        logger.propagate = False
+
+        return logger

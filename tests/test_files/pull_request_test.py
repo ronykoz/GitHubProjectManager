@@ -18,6 +18,13 @@ def test_pull_request():
                     }
                 ],
             },
+            "labels": {
+                "nodes": [
+                    {
+                        "name": "label"
+                    }
+                ],
+            },
             "reviewRequests": {
                 "totalCount": 0
             },
@@ -34,6 +41,7 @@ def test_pull_request():
     assert pull_request.assignees == [assignee]
     assert pull_request.review_requested is True
     assert pull_request.review_completed is False
+    assert "label" in pull_request.labels
 
     pull_request = PullRequest({
         "willCloseTarget": True,
@@ -44,6 +52,13 @@ def test_pull_request():
                 "nodes": [
                     {
                         "login": assignee
+                    }
+                ],
+            },
+            "labels": {
+                "nodes": [
+                    {
+                        "name": "label"
                     }
                 ],
             },

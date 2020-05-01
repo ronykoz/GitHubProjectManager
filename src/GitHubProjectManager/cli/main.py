@@ -32,9 +32,22 @@ def main(version):
 @click.option(
     '-c', '--conf', help='The path to the conf.ini file', required=True
 )
+@click.option(
+    '-v', "--verbose", count=True, help="Verbosity level -v / -vv / .. / -vvv",
+    type=click.IntRange(0, 3, clamp=True), default=2, show_default=True
+)
+@click.option(
+    '-q', "--quiet", is_flag=True, help="Quiet output, only output results in the end"
+)
+@click.option(
+    "--log-path", help="Path to store all levels of logs", type=click.Path(exists=True, resolve_path=True)
+)
 def manage(**kwargs):
     """Manage a GitHub project board"""
-    configuration = Configuration(conf_file_path=kwargs['conf'])
+    configuration = Configuration(conf_file_path=kwargs['conf'],
+                                  verbose=kwargs['verbose'],
+                                  quiet=kwargs['quiet'],
+                                  log_path=kwargs['log_path'])
     configuration.load_properties()
     manager = ProjectManager(configuration=configuration)
     return manager.manage()

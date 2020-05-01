@@ -91,6 +91,9 @@ class Issue(object):
 
         return False
 
+    def __lt__(self, other):
+        return not self.__gt__(other) and other != self
+
     @staticmethod
     def extract_labels_information(issue_node):
         labels = {}

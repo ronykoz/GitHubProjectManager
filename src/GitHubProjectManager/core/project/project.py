@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from copy import deepcopy
+
 from GitHubProjectManager.common.constants import OR
 from GitHubProjectManager.management.configuration import Configuration
 
@@ -31,7 +33,7 @@ class ProjectColumn(object):
         cards = []
         for card in column_node['cards']['edges']:
             card_content = card.get('node', {}).get('content')
-            if not card_content or self.is_epic(card_content):
+            if not card_content:
                 continue
 
             cards.append(IssueCard(id=card.get('node', {}).get('id'),
@@ -47,7 +49,7 @@ class ProjectColumn(object):
     def add_card(self, card_id, issue_id, issues, client):
         new_issue = issues[issue_id]
         insert_after_position = len(self.cards) - 1  # In case it should be the lowest issue
-        if new_issue > issues[self.cards[0].issue_id]:
+        if not self.cards or new_issue > issues[self.cards[0].issue_id]:
             self.cards.insert(0, IssueCard(id=card_id, issue_id=issue_id, issue_title=new_issue.title))
             client.add_to_column(card_id=card_id,
                                  column_id=self.id)
@@ -76,6 +78,35 @@ class ProjectColumn(object):
             if card_id == card.id:
                 del self.cards[index]
                 break
+
+    def move_card_in_list(self, card_id, new_index):
+        old_index = -1
+        old_card = None
+        for index, card in enumerate(self.cards):
+            if card.id == card_id and index != new_index:
+                old_card = deepcopy(card)
+                old_index = index
+                break
+
+        del self.cards[old_index]
+        self.cards.insert(new_index, deepcopy(old_card))
+
+    def sort_cards(self, client, config, issues):
+        sorted_cards = deepcopy(sorted(self.cards, key=lambda card: issues[card.issue_id], reverse=True))
+        for index, card in enumerate(sorted_cards):
+            if card.id != self.cards[index].id:
+
+                self.move_card_in_list(card.id, index)
+                config.logger.info(f"Moving issue '{card.issue_title}' in column '{self.name}' to position: {index}")
+                if index == 0:
+                    client.add_to_column(card_id=card.id,
+                                         column_id=self.id)
+                else:
+                    client.move_to_specific_place_in_column(card_id=card.id,
+                                                            column_id=self.id,
+                                                            after_card_id=sorted_cards[index-1].id)
+
+        self.cards = sorted_cards
 
 
 class Project(object):
@@ -119,13 +150,15 @@ class Project(object):
                         is_true = False
                         break
 
-                elif condition_value != condition_results:
+                elif condition_value != condition_results or condition_value not in condition_results:
                     is_true = False
                     break
 
             if is_true:
                 column_name = tested_column_name
                 break
+
+            config.logger.debug(f'{issue.title} did not match the filters of the column - \'{tested_column_name}\'')
 
         if self.columns.get(column_name):
             column_id = self.columns[column_name].id
@@ -139,14 +172,14 @@ class Project(object):
         all_matching_issues = set(issues.keys())
         return all_matching_issues - issues_in_project_keys
 
-    def add_issues(self, client, issues, issues_to_add, config):
+    def add_issues(self, client, issues, issues_to_add, config: Configuration):
         for issue_id in issues_to_add:
             column_name, column_id = self.get_matching_column(issues[issue_id], config)
             if column_name not in config.column_names:
                 raise Exception(f"Did not found a matching column for your issue, please check your configuration "
                                 f"file. The issue was {issues[issue_id].title}")
 
-            print("Adding issue '{}' to column '{}'".format(issues[issue_id].title, column_name))
+            config.logger.info("Adding issue '{}' to column '{}'".format(issues[issue_id].title, column_name))
             response = client.add_issues_to_project(issue_id, column_id)
             card_id = response['addProjectCard']['cardEdge']['node']['id']
             self.columns[column_name].add_card(card_id=card_id,
@@ -168,17 +201,15 @@ class Project(object):
 
         return None, None
 
-    def re_order_issues(self, client, issues, config):
+    def re_order_issues(self, client, issues, config: Configuration):
         # todo: add explanation that we are relying on the github automation to move closed issues to the Done queue
         for issue in issues.values():
             column_name_before, card_id = self.get_current_location(issue.id)
             column_name_after, column_id = self.get_matching_column(issue, config)
-            if not column_id or (column_name_after == column_name_before and not config.sort):
+            if not column_id or column_name_after == column_name_before:
                 continue
 
-            import ipdb
-            ipdb.set_trace()
-            print(f"Moving card {issue.title} from {column_name_before} to '{column_name_after}'")
+            config.logger.info(f"Moving card {issue.title} from {column_name_before} to '{column_name_after}'")
             self.columns[column_name_after].add_card(card_id=card_id,
                                                      issue_id=issue.id,
                                                      issues=issues,
@@ -186,12 +217,19 @@ class Project(object):
 
             self.columns[column_name_before].remove_card(card_id)
 
-    def remove_issues(self, client, issues):
+    def remove_issues(self, client, issues, config: Configuration):
         for column in self.columns.values():
             if column.name == self.done_column_name:  # Not going over closed issues
                 continue
 
             for card in column.cards:
                 if card.issue_id not in issues:
-                    print(f'Removing issue {card.issue_title} from project')
+                    config.logger.info(f'Removing issue {card.issue_title} from project')
                     client.delete_project_card(card.id)
+
+    def sort_issues_in_columns(self, client, config, issues):
+        for column_name, column in self.columns.items():
+            if column.name == self.done_column_name:  # Not going over closed issues
+                continue
+
+            column.sort_cards(client, config, issues)
