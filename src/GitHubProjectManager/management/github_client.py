@@ -63,11 +63,6 @@ class GraphQLClient(object):
                                 }
                               }
                             }
-                            ... on PullRequest {
-                              id
-                              number
-                              title
-                            }
                           }
                         }
                       }
@@ -92,18 +87,26 @@ class GraphQLClient(object):
                   repository(owner: $owner, name: $name) {
                     issues(first: 100, after:$after, states: OPEN, filterBy:{milestone: $milestone}) {
                       edges {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                        }
                         cursor
                         node {
-                        comments(last:5){
-                            nodes{
-                              author{
-                                login
+                        projectCards(first:5){
+                        nodes{
+                          id
+                          project{
+                            number
+                            columns(first:1){
+                              nodes {
+                                name
                               }
-                              body
-                              createdAt
                             }
                           }
-                          timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                        }
+                        }
+                          timelineItems(first:30, itemTypes:[CROSS_REFERENCED_EVENT]){
                             __typename
                             ... on IssueTimelineItemsConnection{
                               nodes {
@@ -113,6 +116,7 @@ class GraphQLClient(object):
                                     __typename
                                     ... on PullRequest {
                                       state
+                                      isDraft
                                       assignees(first:10){
                                         nodes{
                                           login
@@ -133,19 +137,6 @@ class GraphQLClient(object):
                                       reviewDecision
                                     }
                                   }
-                                }
-                                __typename
-                                ... on LabeledEvent {
-                                  label{
-                                    name
-                                  }
-                                  createdAt
-                                }
-                                ... on UnlabeledEvent {
-                                  label{
-                                    name
-                                  }
-                                  createdAt
                                 }
                               }
                             }
@@ -181,19 +172,27 @@ class GraphQLClient(object):
             query ($after: String, $owner: String!, $name: String!, $labels: [String!], $milestone: String){
               repository(owner: $owner, name: $name) {
                 issues(first: 100, after:$after, states: OPEN, filterBy:{labels: $labels, milestone: $milestone}) {
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
                   edges {
                     cursor
                     node {
-                      comments(last:5){
+                        projectCards(first:5){
                         nodes{
-                          author{
-                            login
+                          id
+                          project{
+                            number
+                            columns(first:1){
+                              nodes {
+                                name
+                              }
+                            }
                           }
-                          body
-                          createdAt
                         }
                       }
-                      timelineItems(first:30, itemTypes:[LABELED_EVENT, UNLABELED_EVENT, CROSS_REFERENCED_EVENT]){
+                      timelineItems(first:30, itemTypes:[CROSS_REFERENCED_EVENT]){
                         __typename
                         ... on IssueTimelineItemsConnection{
                           nodes {
@@ -203,6 +202,7 @@ class GraphQLClient(object):
                                 __typename
                                 ... on PullRequest {
                                   state
+                                  isDraft
                                   assignees(first:10){
                                     nodes{
                                       login
@@ -223,19 +223,6 @@ class GraphQLClient(object):
                                   reviewDecision
                                 }
                               }
-                            }
-                            __typename
-                            ... on LabeledEvent {
-                              label{
-                                name
-                              }
-                              createdAt
-                            }
-                            ... on UnlabeledEvent {
-                              label{
-                                name
-                              }
-                              createdAt
                             }
                           }
                         }
@@ -315,7 +302,7 @@ class GraphQLClient(object):
           }
         }''', {'cardId': card_id})
 
-    def get_project_columns(self, owner, name, number):
+    def get_project_layout(self, owner, repository_name, project_number):
         return self.execute_query('''
         query ($owner: String!, $name: String!, $number: Int!){
       repository(owner: $owner, name: $name) {
@@ -332,13 +319,26 @@ class GraphQLClient(object):
           }
         }
       }
-    }''', {"owner": owner, "name": name, "number": number})
+    }''', {"owner": owner, "name": repository_name, "number": project_number})
 
-    def get_issue_after_change(self, owner, name, issue_number):
+    def get_issue(self, owner, name, issue_number):
         return self.execute_query('''
         query ($owner: String!, $name: String!, $issueNumber: Int!){
   repository(owner: $owner, name: $name) {
     issue(number: $issueNumber) {
+      projectCards(first:5){
+        nodes{
+          id
+          project{
+            number
+            columns(first:1){
+              nodes {
+                name
+              }
+            }
+          }
+        }
+      }
       timelineItems(first: 5, itemTypes: [CROSS_REFERENCED_EVENT]) {
         __typename
         ... on IssueTimelineItemsConnection {
@@ -348,10 +348,23 @@ class GraphQLClient(object):
               source {
                 __typename
                 ... on PullRequest {
+                  state
+                  isDraft
                   assignees(first: 5) {
                     nodes {
                       login
                     }
+                  }
+                  labels(first:5){
+                    nodes{
+                      name
+                    }
+                  }
+                  reviewRequests(first:1){
+                    totalCount
+                  }
+                  reviews(first:1){
+                    totalCount
                   }
                   number
                   reviewDecision
@@ -378,7 +391,7 @@ class GraphQLClient(object):
         edges {
           node {
             id
-            name
+            login
           }
         }
       }
@@ -387,9 +400,10 @@ class GraphQLClient(object):
 }
 ''', {"owner": owner, "name": name, "issueNumber": issue_number})
 
-    def get_column_issues(self, owner, name, project_number, prev_column_id, end_cards_cursor=''):
+    def get_column_issues(self, owner, name, project_number, prev_column_id, start_cards_cursor=''):
         return self.execute_query('''
-        query ($owner: String!, $name: String!, $projectNumber: Int!, $prevColumnID: ID!, $end_cards_cursor: String) {
+        query ($owner: String!, $name: String!, $projectNumber: Int!, $prevColumnID: String!, $start_cards_cursor:
+        String) {
   repository(owner: $owner, name: $name) {
     project(number: $projectNumber) {
       name
@@ -398,7 +412,7 @@ class GraphQLClient(object):
         nodes {
           name
           id
-          cards(first: 100, after: $end_cards_cursor) {
+          cards(first: 100, after: $start_cards_cursor) {
             pageInfo {
               endCursor
               hasNextPage
@@ -422,11 +436,6 @@ class GraphQLClient(object):
                       }
                     }
                   }
-                  ... on PullRequest {
-                    id
-                    number
-                    title
-                  }
                 }
               }
             }
@@ -437,4 +446,55 @@ class GraphQLClient(object):
   }
 }
 ''', {"owner": owner, "name": name, "projectNumber": project_number, "prevColumnID": prev_column_id,
-            "$end_cards_cursor": end_cards_cursor})
+            "$start_cards_cursor": start_cards_cursor})
+
+    def get_first_column_issues(self, owner, name, project_number, start_cards_cursor=''):
+        return self.execute_query('''
+            query ($owner: String!, $name: String!, $projectNumber: Int!, $start_cards_cursor: String) {
+      repository(owner: $owner, name: $name) {
+        project(number: $projectNumber) {
+          name
+          id
+          columns(first: 1) {
+            nodes {
+              name
+              id
+              cards(first: 100, after: $start_cards_cursor) {
+                pageInfo {
+                  endCursor
+                  hasNextPage
+                }
+                edges {
+                  cursor
+                  node {
+                    note
+                    state
+                    id
+                    content {
+                      ... on Issue {
+                        id
+                        number
+                        title
+                        labels(first: 10) {
+                          edges {
+                            node {
+                              name
+                            }
+                          }
+                        }
+                      }
+                      ... on PullRequest {
+                        id
+                        number
+                        title
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ''', {"owner": owner, "name": name, "projectNumber": project_number, "$start_cards_cursor": start_cards_cursor})

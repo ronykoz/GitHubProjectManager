@@ -69,7 +69,7 @@ class Configuration(object):
         # Conditional
         self.column_to_rules = {}
 
-        self.logger = self.logging_setup(verbose, quiet, log_path)
+        self.logger = self.logging_setup(verbose, quiet, log_path, conf_file_path)
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
@@ -131,7 +131,7 @@ class Configuration(object):
         self.load_column_rules()
 
     @staticmethod
-    def logging_setup(verbose, quiet, log_path):
+    def logging_setup(verbose, quiet, log_path, conf_file_path):
         if quiet:
             verbose = 0
 
@@ -147,7 +147,8 @@ class Configuration(object):
             logger.addHandler(console_handler)
 
         if log_path:
-            file_handler = logging.FileHandler(filename=os.path.join(log_path, 'GitHubProjectManager.log'))
+            log_file_name = os.path.basename(conf_file_path)
+            file_handler = logging.FileHandler(filename=os.path.join(log_path, f'{log_file_name}.log'))
             file_handler.setFormatter(fmt)
             file_handler.setLevel(level=logging.DEBUG)
             logger.addHandler(file_handler)

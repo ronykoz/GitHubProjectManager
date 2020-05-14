@@ -9,7 +9,7 @@ MOCK_FOLDER_PATH = os.path.join(os.getcwd(), "tests", "mock_data")
 
 
 def test_loading_configuration():
-    configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'conf.ini'))
+    configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'conf.ini'), quiet=True, log_path="/tmp/")
     assert 'General' in configuration.config.sections()
     configuration.load_properties()
 
@@ -31,7 +31,7 @@ def test_loading_configuration():
     assert configuration.sort is False
 
     assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.review_requested'] is True
-    assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.assignees'] == ['ronykoz']
+    assert configuration.column_to_rules['Waiting for Docs']['issue.pull_request.assignees'] == ['ronykoz||not rony']
 
 
 def test_loading_illegal_configuration():
@@ -44,3 +44,15 @@ def test_loading_illegal_configuration():
     with pytest.raises(ValueError) as exception:
         configuration.load_properties()
         assert 'You have entered an illegal query' in exception
+
+    configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'illegal_action_conf.ini'))
+    with pytest.raises(ValueError) as exception:
+        configuration.load_properties()
+        assert 'Provided illegal key' in exception
+        assert 'in Actions section' in exception
+
+    configuration = Configuration(os.path.join(MOCK_FOLDER_PATH, 'illegal_general_conf.ini'))
+    with pytest.raises(ValueError) as exception:
+        configuration.load_properties()
+        assert 'Provided illegal key' in exception
+        assert 'in General section' in exception
