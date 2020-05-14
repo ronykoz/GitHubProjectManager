@@ -14,9 +14,8 @@ The supported functionality is:
 * Moving issues to the correct column of your project, with the priority in mind.
 * Sorting your issues within your existing columns by their priorities and creation times.
 * Removing issues that fail to meet your issue filters.
-
 ___
-In order to configure GitHubProjectManager you will neet to create an `.ini` file, here is an example:
+In order to configure GitHubProjectManager you will need to create an `.ini` file, here is an example:
 ```buildoutcfg
 [General]
 closed_issues_column = Done
@@ -55,13 +54,18 @@ issue.pull_request.assignees = ronykoz
 
 ```
 While the General and Actions sections must be in the `.ini` the rest of the sections are dynamic, and each represents the rules for each of your columns.
-The keys listed in the column section are the attributes of the classes which represent the issue you are working on.
+The keys listed in the column section are the attributes of the classes which represent the issue you are working on. For a more detailed explanation please click [here](https://github.com/ronykoz/GitHubProjectManager/blob/master/docs/ini_file.md)
+
+
+### GitHub Actions
+In order to use this in a github action please follow this [documentation](https://github.com/ronykoz/GitHubProjectManager/blob/master/docs/ini_file.md).
 
 ___
 ### Usage
-There are two options to run the tool:
-1. Configure an `.ini` file like described above and then using the `GitHubProjectManager manage -c <path to ini>` command - better with a cronjob to order your board automatically.
+There are three options to run the tool:
+1. Configure an `.ini` file like described above and then using the `GitHubProjectManager manage -c <path to ini>` command or the `wehbhook-manage` command which is used for events.
 2. Import the code and create some more custom rules for your self, like importing issues from another board(FYI this will be added to the tool as well).
+3. GitHub actions - In order to use this in a github action please follow this [documentation](https://github.com/ronykoz/GitHubProjectManager/blob/master/docs/ini_file.md).
 
 #### Token
 In any solution you will have to set an envioroonment variable `GITHUB_TOKEN` which is the token you will generate in order for the tool to connect to your GitHub project.
