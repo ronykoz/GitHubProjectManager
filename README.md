@@ -65,7 +65,7 @@ ___
 There are three options to run the tool:
 1. Configure an `.ini` file like described above and then using the `GitHubProjectManager manage -c <path to ini>` command or the `wehbhook-manage` command which is used for events.
 2. Import the code and create some more custom rules for your self, like importing issues from another board(FYI this will be added to the tool as well).
-3. GitHub actions - In order to use this in a github action please follow this [documentation](https://github.com/ronykoz/GitHubProjectManager/blob/master/docs/ini_file.md).
+3. GitHub actions - In order to use this in a github action please follow this [documentation](https://github.com/ronykoz/GitHubProjectManager/blob/master/docs/GitHub_Action_usage.md).
 
 #### Token
 In any solution you will have to set an envioroonment variable `GITHUB_TOKEN` which is the token you will generate in order for the tool to connect to your GitHub project.
