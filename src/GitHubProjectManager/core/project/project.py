@@ -268,6 +268,7 @@ class Project(object):
     @staticmethod
     def remove_issue(client, issue_title, card_id, config):
         config.logger.info(f'Removing issue {issue_title} from project')
+        client.delete_project_card(card_id)
 
     def sort_issues_in_columns(self, client, config):
         for column_name, column in self.columns.items():
